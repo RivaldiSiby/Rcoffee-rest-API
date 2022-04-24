@@ -47,7 +47,7 @@ const putStoreById = async (id, body) => {
   const query =
     "UPDATE store SET name=$2, owner=$3, description=$4 WHERE id=$1 RETURNING id";
   const result = await dbconect.query(query, [id, name, owner, description]);
-  if (result.rows.length === 0) {
+  if (!result.rows.length) {
     throw new NotFoundError("failed to update data. Data not found");
   }
   return result.rows[0].id;
@@ -56,7 +56,7 @@ const putStoreById = async (id, body) => {
 const deleteStoreById = async (id) => {
   const query = "DELETE FROM store WHERE id=$1 RETURNING id";
   const result = await dbconect.query(query, [id]);
-  if (result.rows.length === 0) {
+  if (!result.rows.length) {
     throw new NotFoundError("failed to delete data. Data not found");
   }
   return result.rows[0].id;

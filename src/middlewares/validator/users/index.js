@@ -1,6 +1,7 @@
 const InvariantError = require("../../../exceptions/InvariantError");
 const { rules } = require("./rules");
-const storeValidator = {
+
+const usersValidator = {
   validator: (body) => {
     const result = rules.validate(body);
     if (result.error) {
@@ -8,4 +9,5 @@ const storeValidator = {
     }
   },
 };
-module.exports = storeValidator;
+
+module.exports = usersValidator;

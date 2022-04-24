@@ -1,33 +1,33 @@
-const store = require("../models/store");
+const users = require("../models/users");
 const response = require("../helper/response");
 const ClientError = require("../exceptions/ClientError");
-const storeValidator = require("../middlewares/validator/store/index");
+const usersValidator = require("../middlewares/validator/users/index");
 
-const readStore = async (req, res) => {
-  const result = await store.getStore();
+const readUsers = async (req, res) => {
+  const result = await users.getUsers();
   return response.isSuccessHaveData(
     res,
     200,
     result.rows,
-    "Read Data Store has been success"
+    "Read Data has been success"
   );
 };
-const readStoreById = async (req, res) => {
+
+const readUserById = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await store.getStoreById(id);
+    const result = await users.getUserById(id);
+
     return response.isSuccessHaveData(
       res,
-      200,
+      201,
       result,
-      "Read Single Data Store has been success"
+      "Read Single Data has been success"
     );
   } catch (error) {
     if (error instanceof ClientError) {
       return response.isError(res, error.statusCode, error.message);
     }
-    //   error server
-    console.log(error);
     return response.isError(
       res,
       500,
@@ -36,23 +36,21 @@ const readStoreById = async (req, res) => {
   }
 };
 
-const createStore = async (req, res) => {
+const createUser = async (req, res) => {
   try {
-    // check validasi
-    storeValidator.validator(req.body);
-    const result = await store.postStore(req.body);
+    usersValidator.validator(req.body);
+    const result = await users.postUser(req.body);
     return response.isSuccessHaveData(
       res,
       201,
       { id: result },
-      "Create Data Store has been success"
+      "Create Data has been success"
     );
   } catch (error) {
     if (error instanceof ClientError) {
       return response.isError(res, error.statusCode, error.message);
     }
-    //   error server
-    console.log(error);
+
     return response.isError(
       res,
       500,
@@ -61,22 +59,17 @@ const createStore = async (req, res) => {
   }
 };
 
-const editStoreById = async (req, res) => {
+const editUserById = async (req, res) => {
   try {
+    usersValidator.validator(req.body);
     const { id } = req.params;
-    storeValidator.validator(req.body);
-    await store.putStoreById(id, req.body);
-    return response.isSuccessNoData(
-      res,
-      200,
-      "Update Data Store has been success"
-    );
+    await users.putUserById(id, req.body);
+    return response.isSuccessNoData(res, 200, "Update Data has been success");
   } catch (error) {
     if (error instanceof ClientError) {
       return response.isError(res, error.statusCode, error.message);
     }
-    //   error server
-    console.log(error);
+
     return response.isError(
       res,
       500,
@@ -85,21 +78,16 @@ const editStoreById = async (req, res) => {
   }
 };
 
-const deleteStoreById = async (req, res) => {
+const deleteUserById = async (req, res) => {
   try {
     const { id } = req.params;
-    await store.deleteStoreById(id);
-    return response.isSuccessNoData(
-      res,
-      200,
-      "Delete Data Store has been success"
-    );
+    await users.deleteUserById(id);
+    return response.isSuccessNoData(res, 200, "Delete Data has been Success");
   } catch (error) {
     if (error instanceof ClientError) {
       return response.isError(res, error.statusCode, error.message);
     }
-    //   error server
-    console.log(error);
+
     return response.isError(
       res,
       500,
@@ -109,9 +97,9 @@ const deleteStoreById = async (req, res) => {
 };
 
 module.exports = {
-  readStore,
-  readStoreById,
-  createStore,
-  editStoreById,
-  deleteStoreById,
+  readUsers,
+  readUserById,
+  createUser,
+  editUserById,
+  deleteUserById,
 };
