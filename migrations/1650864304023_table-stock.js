@@ -3,25 +3,25 @@
 exports.shorthands = undefined;
 
 exports.up = (pgm) => {
-  pgm.createTable("product", {
+  pgm.createTable("stock", {
     id: {
       type: "VARCHAR(50)",
       primaryKey: true,
     },
-    name: {
-      type: "VARCHAR(255)",
+    product_id: {
+      type: "VARCHAR(50)",
       notNull: true,
     },
-    category: {
+    size: {
       type: "VARCHAR(100)",
       notNull: true,
     },
-    description: {
-      type: "TEXT",
+    quantity: {
+      type: "VARCHAR(50)",
       notNull: true,
     },
-    img: {
-      type: "TEXT",
+    price_unit: {
+      type: "VARCHAR(100)",
       notNull: true,
     },
     created_at: {
@@ -36,5 +36,5 @@ exports.up = (pgm) => {
 };
 
 exports.down = (pgm) => {
-  pgm.dropTable("product");
+  pgm.dropTable("stock");
 };

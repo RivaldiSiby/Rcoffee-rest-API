@@ -40,18 +40,19 @@ const getProductById = async (id) => {
 };
 
 const postProduct = async (body) => {
-  const { name, description, category } = body;
+  const { name, description, category, img } = body;
   const id = `product-${nanoid(16)}`;
   const created_at = new Date().toISOString();
   const updated_at = created_at;
   const query =
-    "INSERT INTO product VALUES ($1,$2,$3,$4,$5,$6) RETURNING id,name,category";
+    "INSERT INTO product VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id,name,category";
 
   const result = await dbconect.query(query, [
     id,
     name,
     category,
     description,
+    img,
     created_at,
     updated_at,
   ]);
@@ -63,13 +64,14 @@ const postProduct = async (body) => {
 };
 
 const putProduct = async (id, body) => {
-  const { name, description, category } = body;
+  const { name, description, category, img } = body;
   const updated_at = new Date().toISOString();
   const query =
     "UPDATE product SET name=$1, category=$2, description=$3, updated_at=$4 WHERE id=$5 RETURNING id ";
   const result = await dbconect.query(query, [
     name,
     category,
+    img,
     description,
     updated_at,
     id,
