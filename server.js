@@ -2,6 +2,9 @@ require("dotenv").config();
 // express
 const express = require("express");
 
+// time zone WIB
+// process.env.TZ = "Asia/Jakarta";
+
 // router connect
 const mainRouter = require("./src/routes/index");
 
