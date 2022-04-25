@@ -1,8 +1,14 @@
 const InvariantError = require("../../../exceptions/InvariantError");
-const { rules } = require("./rules");
+const { rulesPost, rulesPut } = require("./rules");
 const stockValidator = {
-  validator: (body) => {
-    const result = rules.validate(body);
+  validatorPost: (body) => {
+    const result = rulesPost.validate(body);
+    if (result.error) {
+      throw new InvariantError(result.error.message);
+    }
+  },
+  validatorPut: (body) => {
+    const result = rulesPut.validate(body);
     if (result.error) {
       throw new InvariantError(result.error.message);
     }

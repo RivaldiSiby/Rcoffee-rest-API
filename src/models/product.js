@@ -5,14 +5,15 @@ const NotFoundError = require("../exceptions/NotFoundError");
 const dbconect = new Pool();
 
 const getProductsAll = async () => {
-  const query = "SELECT * FROM product";
+  const query =
+    "SELECT p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price_unit FROM product p INNER JOIN stock s ON p.id  = s.product_id ;";
   const result = await dbconect.query(query);
   return result;
 };
 
 const getProductsByCategory = async (category) => {
   const query =
-    "SELECT * FROM product WHERE lower(category) LIKE lower('%' || $1 || '%')  ORDER BY name ASC";
+    "SELECT p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price_unit FROM product p INNER JOIN stock s ON p.id  = s.product_id WHERE lower(category) LIKE lower('%' || $1 || '%')  ORDER BY name ASC";
   const result = await dbconect.query(query, [category]);
   if (!result.rows.length) {
     throw new NotFoundError("Search Data By Category is Not Found");
@@ -22,7 +23,7 @@ const getProductsByCategory = async (category) => {
 
 const getProductByName = async (name) => {
   const query =
-    "SELECT * FROM product WHERE lower(name) LIKE lower('%' || $1 || '%') ";
+    "SELECT p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price_unit FROM product p INNER JOIN stock s ON p.id  = s.product_id WHERE lower(name) LIKE lower('%' || $1 || '%')  ";
   const result = await dbconect.query(query, [name]);
   if (!result.rows.length) {
     throw new NotFoundError("Search Data By Name is Not Found");
