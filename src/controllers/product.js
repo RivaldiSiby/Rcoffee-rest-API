@@ -12,7 +12,7 @@ const readProductsAll = async (req, res) => {
     return response.isSuccessHaveData(
       res,
       200,
-      result.rows,
+      result,
       "Read Data has been success"
     );
   } catch (error) {
@@ -47,7 +47,7 @@ const findProduct = async (req, res) => {
       return response.isSuccessHaveData(
         res,
         200,
-        result.rows,
+        result,
         "Read All Data By Category has been success"
       );
     }

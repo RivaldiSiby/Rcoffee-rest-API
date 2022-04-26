@@ -19,16 +19,27 @@ const getPromosById = async (id) => {
   }
   return result.rows[0];
 };
+const getPromosByCoupon = async (coupen) => {
+  const query = "SELECT * FROM promos WHERE coupen=$1";
+  const result = await dbconect.query(query, [coupen]);
+
+  if (!result.rows.length) {
+    throw new NotFoundError("Data not Found");
+  }
+  return result.rows[0];
+};
 const postPromos = async (body) => {
   const id = `discount-${nanoid(16)}`;
-  const { discount, description } = body;
+  const { discount, description, coupon, product_id } = body;
   const created_at = new Date().toISOString();
   const updated_at = created_at;
-  const query = "INSERT INTO promos VALUES ($1,$2,$3,$4,$5) RETURNING id";
+  const query = "INSERT INTO promos VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id";
   const result = await dbconect.query(query, [
     id,
     discount,
     description,
+    coupon,
+    product_id,
     created_at,
     updated_at,
   ]);
@@ -40,13 +51,15 @@ const postPromos = async (body) => {
 };
 
 const putPromosById = async (id, body) => {
-  const { discount, description } = body;
+  const { discount, description, coupon, product_id } = body;
   const updated_at = new Date().toISOString();
   const query =
-    "UPDATE promos SET discount=$1, description=$2, updated_at=$3 WHERE id=$4 RETURNING id";
+    "UPDATE promos SET discount=$1, description=$2, coupon=$3, product_id=$4 updated_at=$5 WHERE id=$6 RETURNING id";
   const result = await dbconect.query(query, [
     discount,
     description,
+    coupon,
+    product_id,
     updated_at,
     id,
   ]);
@@ -73,4 +86,5 @@ module.exports = {
   postPromos,
   putPromosById,
   deletePromosById,
+  getPromosByCoupon,
 };

@@ -3,38 +3,47 @@
 exports.shorthands = undefined;
 
 exports.up = (pgm) => {
-  pgm.createTable("promos", {
+  pgm.createTable("transaction", {
     id: {
       type: "VARCHAR(50)",
       primaryKey: true,
     },
-    discount: {
+    quantity_items: {
       type: "VARCHAR(50)",
       notNull: true,
     },
-    description: {
-      type: "TEXT",
-      notNull: true,
-    },
-    coupon: {
-      type: "TEXT",
-      notNull: true,
-    },
-    product_id: {
+    costumer: {
       type: "VARCHAR(100)",
       notNull: true,
     },
-    created_at: {
+    coupen: {
+      type: "TEXT",
+    },
+    price: {
       type: "VARCHAR(255)",
       notNull: true,
     },
-    updated_at: {
+    delivery_cost: {
       type: "VARCHAR(255)",
+    },
+    tax: {
+      type: "VARCHAR(100)",
+    },
+    total: {
+      type: "VARCHAR(255)",
+      notNull: true,
+    },
+    created_at: {
+      type: "VARCHAR(100)",
+      notNull: true,
+    },
+    updated_at: {
+      type: "VARCHAR(100)",
       notNull: true,
     },
   });
 };
 
 exports.down = (pgm) => {
-  pgm.dropTable("promos");
+  pgm.dropTable("transaction");
 };

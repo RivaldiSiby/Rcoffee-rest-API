@@ -1,0 +1,60 @@
+const { nanoid } = require("nanoid");
+const { Pool } = require("pg");
+const InvariantError = require("../exceptions/InvariantError");
+const NotFoundError = require("../exceptions/NotFoundError");
+const dbconect = new Pool();
+
+const postSales = async (body) => {
+  const id = `sales-${nanoid(16)}`;
+  const { stock_id, product_id, transaction_id, quantity, discount, total } =
+    body;
+  const query = "INSERT INTO sales VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id";
+
+  const result = await dbconect.query(query, [
+    id,
+    stock_id,
+    product_id,
+    transaction_id,
+    quantity,
+    discount,
+    total,
+  ]);
+
+  if (!result.rows.length) {
+    throw new InvariantError("failed to add data");
+  }
+  return result.rows[0].id;
+};
+
+const getSalesByTransaction = async (transaction) => {
+  const query =
+    "SELECT p.id, p.name ,p.category, p.description, p.img, ss.transaction_id,  s.size, ss.quantity, s.price_unit, ss.discount, ss.total FROM sales ss INNER JOIN stock s ON ss.stock_id = s.id inner join product p on ss.product_id  = p.id WHERE transaction_id = $1 ORDER BY total DESC";
+  const result = await dbconect.query(query, [transaction]);
+  if (!result.rows.length) {
+    throw new NotFoundError(
+      "Failed to ged Data Sales By Transaction. Data not Found "
+    );
+  }
+  return result.rows;
+};
+
+const getSales = async (id = null) => {
+  if (id === null) {
+    const query =
+      "SELECT p.id, p.name ,p.category, p.description, p.img, ss.transaction_id,  s.size, ss.quantity, s.price_unit, ss.discount, ss.total FROM sales ss INNER JOIN stock s ON ss.stock_id = s.id inner join product p on ss.product_id  = p.id ORDER BY total DESC";
+    const result = await dbconect.query(query);
+    if (!result.rows.length) {
+      throw new NotFoundError("Data not Found ");
+    }
+    return result.rows;
+  }
+  const query =
+    "SELECT p.id, p.name ,p.category, p.description, p.img, ss.transaction_id,  s.size, ss.quantity, s.price_unit, ss.discount, ss.total FROM sales ss INNER JOIN stock s ON ss.stock_id = s.id inner join product p on ss.product_id  = p.id WHERE id = $1 ORDER BY total DESC";
+  const result = await dbconect.query(query, [id]);
+  if (!result.rows.length) {
+    throw new NotFoundError("Failed to ged Data Sales By Id. Data not Found ");
+  }
+  return result.rows;
+};
+
+module.exports = { getSales, getSalesByTransaction, postSales };
