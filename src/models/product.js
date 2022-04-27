@@ -19,11 +19,6 @@ const getProductsAll = async (sort = null, order = null) => {
   return result.rows;
 };
 
-const getFavorite = async () => {
-  // if(){
-  // }
-};
-
 const getProductsByCategory = async (category) => {
   const query =
     "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price_unit FROM product p INNER JOIN stock s ON p.id  = s.product_id WHERE lower(category) LIKE lower('%' || $1 || '%')  ORDER BY price_unit DESC";
@@ -55,6 +50,15 @@ const getProductById = async (id) => {
   }
   return result.rows;
 };
+const getJustProductById = async (id) => {
+  console.log(id);
+  const query = "SELECT * FROM product WHERE id = $1";
+  const result = await dbconect.query(query, [id]);
+  if (!result.rows.length) {
+    throw new NotFoundError("Search Data By Id is Not Found");
+  }
+  return result.rows[0];
+};
 
 const postProduct = async (body) => {
   const { name, description, category, img } = body;
@@ -84,7 +88,7 @@ const putProduct = async (id, body) => {
   const { name, description, category, img } = body;
   const updated_at = new Date().toISOString();
   const query =
-    "UPDATE product SET name=$1, category=$2, description=$3, updated_at=$4 WHERE id=$5 RETURNING id ";
+    "UPDATE product SET name=$1, category=$2, img=$3, description=$4, updated_at=$5 WHERE id=$6 RETURNING id ";
   const result = await dbconect.query(query, [
     name,
     category,
@@ -116,4 +120,5 @@ module.exports = {
   putProduct,
   deleteProductById,
   getProductByName,
+  getJustProductById,
 };

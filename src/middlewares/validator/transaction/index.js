@@ -1,11 +1,13 @@
 const InvariantError = require("../../../exceptions/InvariantError");
+const response = require("../../../helper/response");
 const { rulesBody } = require("./rules");
 const transactionValidator = {
-  validator: (req, res) => {
+  validator: (req, res, next) => {
     const result = rulesBody.validate(req.body);
     if (result.error) {
-      throw new InvariantError(result.error.message);
+      return response.isError(res, 400, result.error.message);
     }
+
     next();
   },
 };

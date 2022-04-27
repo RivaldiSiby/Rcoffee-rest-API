@@ -12,12 +12,10 @@ const {
   createProduct,
   editProductById,
   deleteProductById,
-  findProduct,
 } = productController;
 
 // Router list
 
-// Router.get("/", findProduct);
 Router.get("/", readProducts);
 Router.get("/:id", readProductById);
 Router.post("/", productValidatorBody.validator, createProduct);

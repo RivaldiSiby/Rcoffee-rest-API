@@ -81,6 +81,15 @@ const deleteStockById = async (id) => {
   }
   return result.rows[0].id;
 };
+const deleteStockByProduct = async (product) => {
+  const query = "DELETE FROM stock WHERE product_id = $1 RETURNING id";
+  const result = await dbconect.query(query, [product]);
+
+  if (!result.rows.length) {
+    throw new NotFoundError("failed to delete data. Data not found");
+  }
+  return result.rows[0].id;
+};
 
 module.exports = {
   getStockById,
@@ -89,4 +98,5 @@ module.exports = {
   putStock,
   deleteStockById,
   putStockQuantity,
+  deleteStockByProduct,
 };

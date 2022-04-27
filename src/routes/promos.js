@@ -14,8 +14,8 @@ const {
 // router list
 Router.get("/", readPromosAll);
 Router.get("/:id", readPromosById);
-Router.post("/", createPromos);
-Router.put("/:id", editPromosById);
+Router.post("/",promosValidator.validator, createPromos);
+Router.put("/:id",promosValidator.validator, editPromosById);
 Router.delete("/:id", deletePromosById);
 
 module.exports = Router;

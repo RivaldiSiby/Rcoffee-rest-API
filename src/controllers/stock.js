@@ -46,7 +46,7 @@ const readStockById = async (req, res) => {
 };
 const createdNewStock = async (req, res) => {
   try {
-    await product.getProductById(req.body.product_id);
+    await product.getJustProductById(req.body.product_id);
     const result = await stock.postStock(req.body);
     return response.isSuccessHaveData(
       res,
@@ -84,7 +84,7 @@ const editStockById = async (req, res) => {
         "Add Data Quantity has been success"
       );
     }
-    stockValidator.validatorPut(req.body);
+
     await stock.putStock(id, req.body);
     return response.isSuccessNoData(res, 200, "Update Data has been success");
   } catch (error) {

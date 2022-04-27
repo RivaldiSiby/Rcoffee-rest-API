@@ -1,7 +1,6 @@
 const users = require("../models/users");
 const response = require("../helper/response");
 const ClientError = require("../exceptions/ClientError");
-const usersValidator = require("../middlewares/validator/users/index");
 
 const readUsers = async (req, res) => {
   const result = await users.getUsers();
@@ -20,7 +19,7 @@ const readUserById = async (req, res) => {
 
     return response.isSuccessHaveData(
       res,
-      201,
+      200,
       result,
       "Read Single Data has been success"
     );
@@ -38,7 +37,6 @@ const readUserById = async (req, res) => {
 
 const createUser = async (req, res) => {
   try {
-    usersValidator.validator(req.body);
     const result = await users.postUser(req.body);
     return response.isSuccessHaveData(
       res,
@@ -61,7 +59,6 @@ const createUser = async (req, res) => {
 
 const editUserById = async (req, res) => {
   try {
-    usersValidator.validator(req.body);
     const { id } = req.params;
     await users.putUserById(id, req.body);
     return response.isSuccessNoData(res, 200, "Update Data has been success");
