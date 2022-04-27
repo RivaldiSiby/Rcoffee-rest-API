@@ -46,7 +46,6 @@ const readStockById = async (req, res) => {
 };
 const createdNewStock = async (req, res) => {
   try {
-    stockValidator.validatorPost(req.body);
     await product.getProductById(req.body.product_id);
     const result = await stock.postStock(req.body);
     return response.isSuccessHaveData(

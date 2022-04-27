@@ -19,6 +19,11 @@ const getProductsAll = async (sort = null, order = null) => {
   return result.rows;
 };
 
+const getFavorite = async () => {
+  // if(){
+  // }
+};
+
 const getProductsByCategory = async (category) => {
   const query =
     "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price_unit FROM product p INNER JOIN stock s ON p.id  = s.product_id WHERE lower(category) LIKE lower('%' || $1 || '%')  ORDER BY price_unit DESC";

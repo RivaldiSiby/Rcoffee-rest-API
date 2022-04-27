@@ -85,7 +85,6 @@ const readProductById = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
-    productValidatorBody.validator(req.body);
     const result = await product.postProduct(req.body);
     return response.isSuccessHaveData(
       res,
@@ -109,7 +108,6 @@ const createProduct = async (req, res) => {
 
 const editProductById = async (req, res) => {
   try {
-    productValidatorBody.validator(req.body);
     const { id } = req.params;
     await product.putProduct(id, req.body);
     return response.isSuccessNoData(res, 200, "Update Data has been success");

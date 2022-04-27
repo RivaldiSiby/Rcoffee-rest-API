@@ -1,7 +1,6 @@
 const ClientError = require("../exceptions/ClientError");
 const response = require("../helper/response");
 const promos = require("../models/promos");
-const promosValidator = require("../middlewares/validator/promos/index");
 
 const readPromosAll = async (req, res) => {
   try {
@@ -50,7 +49,6 @@ const readPromosById = async (req, res) => {
 
 const createPromos = async (req, res) => {
   try {
-    promosValidator.validator(req.body);
     const result = await promos.postPromos(req.body);
     return response.isSuccessHaveData(
       res,
@@ -74,7 +72,7 @@ const createPromos = async (req, res) => {
 const editPromosById = async (req, res) => {
   try {
     const { id } = req.params;
-    promosValidator.validator(req.body);
+
     await promos.putPromosById(id, req.body);
     return response.isSuccessNoData(res, 200, "Update Data has been success");
   } catch (error) {

@@ -7,6 +7,7 @@ const usersValidator = {
     if (result.error) {
       throw new InvariantError(result.error.message);
     }
+    next();
   },
 };
 
