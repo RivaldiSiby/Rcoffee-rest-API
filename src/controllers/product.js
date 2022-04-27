@@ -1,36 +1,12 @@
 const ClientError = require("../exceptions/ClientError");
 const response = require("../helper/response");
 const product = require("../models/product");
-const {
-  productValidatorBody,
-} = require("../middlewares/validator/product/index");
-const NotFoundError = require("../exceptions/NotFoundError");
 
-const readProductsAll = async (req, res) => {
-  try {
-    const result = await product.getProductsAll();
-    return response.isSuccessHaveData(
-      res,
-      200,
-      result,
-      "Read Data has been success"
-    );
-  } catch (error) {
-    if (error instanceof ClientError) {
-      return response.isError(res, error.statusCode, error.message);
-    }
-    //   error server
-    console.log(error);
-    return response.isError(
-      res,
-      500,
-      "Sorry, there was a failure on our server"
-    );
-  }
-};
-const findProduct = async (req, res) => {
+const readProducts = async (req, res) => {
   try {
     const { query } = req;
+    const sort = Object.keys(query).find((item) => item === "sort");
+    const order = Object.keys(query).find((item) => item === "order");
     const byCategory = Object.keys(query).find((item) => item === "category");
     const byName = Object.keys(query).find((item) => item === "name");
     if (byName !== undefined) {
@@ -39,7 +15,7 @@ const findProduct = async (req, res) => {
         res,
         200,
         result,
-        "Read Single Data By Name has been success"
+        "Read Data By Name has been success"
       );
     }
     if (byCategory !== undefined) {
@@ -51,7 +27,24 @@ const findProduct = async (req, res) => {
         "Read All Data By Category has been success"
       );
     }
-    throw new NotFoundError("Data is Not Found");
+    if (sort !== undefined && order !== undefined) {
+      let keysort = query.sort.toLowerCase() === "harga" ? "price_unit" : "";
+      keysort = query.sort.toLowerCase() === "waktu" ? "created_at" : keysort;
+      const result = await product.getProductsAll(keysort, query.order);
+      return response.isSuccessHaveData(
+        res,
+        200,
+        result,
+        "Read Data has been success"
+      );
+    }
+    const result = await product.getProductsAll();
+    return response.isSuccessHaveData(
+      res,
+      200,
+      result,
+      "Read Data has been success"
+    );
   } catch (error) {
     if (error instanceof ClientError) {
       return response.isError(res, error.statusCode, error.message);
@@ -74,7 +67,7 @@ const readProductById = async (req, res) => {
       res,
       200,
       result,
-      "Read Single Data has been success"
+      "Read Data By Id has been success"
     );
   } catch (error) {
     if (error instanceof ClientError) {
@@ -154,10 +147,9 @@ const deleteProductById = async (req, res) => {
 };
 
 module.exports = {
-  readProductsAll,
+  readProducts,
   readProductById,
   createProduct,
   editProductById,
   deleteProductById,
-  findProduct,
 };

@@ -63,6 +63,7 @@ const createPromos = async (req, res) => {
       return response.isError(res, error.statusCode, error.message);
     }
     // server error
+    console.log(error);
     return response.isError(
       res,
       500,

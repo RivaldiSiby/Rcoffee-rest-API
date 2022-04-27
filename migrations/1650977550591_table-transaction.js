@@ -19,19 +19,11 @@ exports.up = (pgm) => {
     coupen: {
       type: "TEXT",
     },
-    price: {
-      type: "VARCHAR(255)",
-      notNull: true,
-    },
     delivery_cost: {
       type: "VARCHAR(255)",
     },
     tax: {
       type: "VARCHAR(100)",
-    },
-    total: {
-      type: "VARCHAR(255)",
-      notNull: true,
     },
     created_at: {
       type: "VARCHAR(100)",

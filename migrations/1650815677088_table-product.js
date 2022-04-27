@@ -25,11 +25,11 @@ exports.up = (pgm) => {
       notNull: true,
     },
     created_at: {
-      type: "VARCHAR(255)",
+      type: "VARCHAR",
       notNull: true,
     },
     updated_at: {
-      type: "VARCHAR(255)",
+      type: "VARCHAR",
       notNull: true,
     },
   });

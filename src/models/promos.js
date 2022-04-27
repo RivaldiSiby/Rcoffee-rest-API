@@ -19,9 +19,9 @@ const getPromosById = async (id) => {
   }
   return result.rows[0];
 };
-const getPromosByCoupon = async (coupen) => {
-  const query = "SELECT * FROM promos WHERE coupen=$1";
-  const result = await dbconect.query(query, [coupen]);
+const getPromosByCoupon = async (coupon) => {
+  const query = "SELECT * FROM promos WHERE coupon=$1";
+  const result = await dbconect.query(query, [coupon]);
 
   if (!result.rows.length) {
     throw new NotFoundError("Data not Found");

@@ -3,7 +3,7 @@ const express = require("express");
 const Router = express.Router();
 
 const stockController = require("../controllers/stock");
-
+const stockValidator = require("../middlewares/validator/stock/index");
 const {
   readStockById,
   readStocks,
@@ -14,8 +14,8 @@ const {
 
 Router.get("/", readStocks);
 Router.get("/:id", readStockById);
-Router.post("/", createdNewStock);
-Router.put("/:id", editStockById);
+Router.post("/", stockValidator.validatorPost, createdNewStock);
+Router.put("/:id", stockValidator.validatorPut, editStockById);
 Router.delete("/:id", deleteStockById);
 
 module.exports = Router;

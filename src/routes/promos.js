@@ -1,7 +1,7 @@
 const express = require("express");
 
 const Router = express.Router();
-
+const promosValidator = require("../middlewares/validator/promos/index");
 const promosController = require("../controllers/promos");
 const {
   readPromosAll,

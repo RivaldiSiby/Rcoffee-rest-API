@@ -24,11 +24,11 @@ exports.up = (pgm) => {
       type: "VARCHAR(100)",
     },
     quantity: {
-      type: "VARCHAR(100)",
+      type: "INTEGER",
       notNull: true,
     },
     total: {
-      type: "VARCHAR(100)",
+      type: "INTEGER",
       notNull: true,
     },
   });

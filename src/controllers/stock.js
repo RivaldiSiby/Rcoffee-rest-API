@@ -2,7 +2,6 @@ const ClientError = require("../exceptions/ClientError");
 const response = require("../helper/response");
 const stock = require("../models/stock");
 const product = require("../models/product");
-const stockValidator = require("../middlewares/validator/stock/index");
 
 const readStocks = async (req, res) => {
   try {

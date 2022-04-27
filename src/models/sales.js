@@ -12,11 +12,11 @@ const postSales = async (body) => {
 
   const result = await dbconect.query(query, [
     id,
-    stock_id,
     product_id,
+    stock_id,
     transaction_id,
-    quantity,
     discount,
+    parseInt(quantity),
     total,
   ]);
 
@@ -28,13 +28,22 @@ const postSales = async (body) => {
 
 const getSalesByTransaction = async (transaction) => {
   const query =
-    "SELECT p.id, p.name ,p.category, p.description, p.img, ss.transaction_id,  s.size, ss.quantity, s.price_unit, ss.discount, ss.total FROM sales ss INNER JOIN stock s ON ss.stock_id = s.id inner join product p on ss.product_id  = p.id WHERE transaction_id = $1 ORDER BY total DESC";
+    "SELECT p.id, p.name ,p.category, p.description, p.img, ss.transaction_id,  s.size, ss.quantity, s.price_unit, ss.discount, ss.total FROM sales ss INNER JOIN stock s ON ss.stock_id = s.id inner join product p on ss.product_id  = p.id WHERE transaction_id = $1 ";
+  const querySum =
+    "select SUM(ss.total) AS totaltransaction FROM sales ss INNER JOIN stock s ON ss.stock_id = s.id inner join product p on ss.product_id  = p.id WHERE ss.transaction_id = $1 group by ss.transaction_id  ";
   const result = await dbconect.query(query, [transaction]);
+  const sumTotal = await dbconect.query(querySum, [transaction]);
   if (!result.rows.length) {
     throw new NotFoundError(
       "Failed to ged Data Sales By Transaction. Data not Found "
     );
   }
+
+  result.rows = [
+    ...result.rows,
+    { item_total: sumTotal.rows[0].totaltransaction },
+  ];
+
   return result.rows;
 };
 
@@ -57,4 +66,20 @@ const getSales = async (id = null) => {
   return result.rows;
 };
 
-module.exports = { getSales, getSalesByTransaction, postSales };
+const deleteSalesByTransaction = async (transaction) => {
+  const query = "DELETE FROM sales WHERE transactin_id = $1 RETURNING id";
+  const result = await dbconect.query(query, [transaction]);
+  if (!result.rows.length) {
+    throw new NotFoundError(
+      "Failed to delete Data Sales By Transaction. Data not Found "
+    );
+  }
+  return result.rows;
+};
+
+module.exports = {
+  deleteSalesByTransaction,
+  getSales,
+  getSalesByTransaction,
+  postSales,
+};
