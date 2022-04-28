@@ -23,9 +23,6 @@ const getPromosByCoupon = async (coupon) => {
   const query = "SELECT * FROM promos WHERE coupon=$1";
   const result = await dbconect.query(query, [coupon]);
 
-  if (!result.rows.length) {
-    throw new NotFoundError("Data not Found");
-  }
   return result.rows[0];
 };
 const postPromos = async (body) => {

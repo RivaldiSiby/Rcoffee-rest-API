@@ -19,6 +19,7 @@ const createTransaction = async (req, res) => {
     await products.map(async (item) => {
       //   tarik data stock
       const stockdata = await stock.getStockById(item.stock_id);
+
       if (stockdata.length === 0) {
         throw new InvariantError("stock_id is invalid");
       }
@@ -26,7 +27,7 @@ const createTransaction = async (req, res) => {
       let totalsales = parseInt(item.quantity) * parseInt(stockdata.price_unit);
       //   cek coupon promos
       let discount;
-      if (!checkPromos.length) {
+      if (checkPromos !== undefined) {
         // cek apakah product yang dipilih terdaftar disuatu promo
         discount =
           checkPromos.product_id === item.product_id

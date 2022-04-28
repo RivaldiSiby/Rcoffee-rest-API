@@ -6,13 +6,15 @@ const NotFoundError = require("../exceptions/NotFoundError");
 const dbconect = new Pool();
 
 const getUsers = async () => {
-  const query = "SELECT * FROM users";
+  const query =
+    "SELECT id,name,email,phone,date_birth,gender,address FROM users";
   const result = await dbconect.query(query);
   return result;
 };
 
 const getUserById = async (id) => {
-  const query = "SELECT * FROM users WHERE id = $1 ";
+  const query =
+    "SELECT id,name,email,phone,date_birth,gender,address FROM users WHERE id = $1 ";
   const result = await dbconect.query(query, [id]);
   if (!result.rows.length) {
     throw new NotFoundError("Data not Found");
