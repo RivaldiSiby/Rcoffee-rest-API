@@ -8,6 +8,7 @@ const { nanoid } = require("nanoid");
 const response = require("../helper/response");
 const ClientError = require("../exceptions/ClientError");
 const InvariantError = require("../exceptions/InvariantError");
+const NotFoundError = require("../exceptions/NotFoundError");
 
 const createTransaction = async (req, res) => {
   try {
@@ -18,51 +19,70 @@ const createTransaction = async (req, res) => {
     await users.getUserById(costumer);
     const checkPromos = await promos.getPromosByCoupon(coupon);
 
-    products.map(async (item) => {
-      //   tarik data stock
-      await product.getJustProductById(item.product_id);
-      const stockdata = await stock.getStockById(item.stock_id);
+    const checkresult = new Promise((resolve, reject) => {
+      // mengola data dan operasi
+      products.map(async (item) => {
+        try {
+          await product.getJustProductById(item.product_id);
+          const stockdata = await stock.getStockById(item.stock_id);
 
-      if (stockdata.length === 0) {
-        throw new InvariantError("stock_id is invalid");
-      }
-      //   total price sales
-      let totalsales = parseInt(item.quantity) * parseInt(stockdata.price_unit);
-      //   cek coupon promos
-      let discount;
-      if (checkPromos !== undefined) {
-        // cek apakah product yang dipilih terdaftar disuatu promo
-        discount =
-          checkPromos.product_id === item.product_id
-            ? checkPromos.discount
-            : null;
+          if (stockdata.length === 0) {
+            throw new InvariantError("stock_id is invalid");
+          }
+          // mengecek jumlah data stock
+          if (
+            parseInt(stockdata.quantity) < 1 ||
+            parseInt(item.quantity) > parseInt(stockdata.quantity)
+          ) {
+            throw new InvariantError("out of stock product");
+          }
+          //   total price sales
+          let totalsales =
+            parseInt(item.quantity) * parseInt(stockdata.price_unit);
+          //   cek coupon promos
+          let discount;
+          if (checkPromos !== undefined) {
+            // cek apakah product yang dipilih terdaftar disuatu promo
+            discount =
+              checkPromos.product_id === item.product_id
+                ? checkPromos.discount
+                : null;
 
-        // cek discount jika ada kurangkan total dengan discount
-        totalsales =
-          discount !== null
-            ? totalsales - parseFloat(discount) * totalsales
-            : totalsales;
-      }
-      //   kelola data
-      const data = {
-        transaction_id: id,
-        discount: discount,
-        total: totalsales,
-      };
-      const databody = { ...item, ...data };
-      // mengecek jumlah data stock
-      if (parseInt(stockdata.quantity) < 1) {
-        throw new InvariantError("out of stock product");
-      }
-      // mengurangkan data stock
-      const newQuantity =
-        parseInt(stockdata.quantity) - parseInt(item.quantity);
+            // cek discount jika ada kurangkan total dengan discount
+            totalsales =
+              discount !== null
+                ? totalsales - parseFloat(discount) * totalsales
+                : totalsales;
+          }
+          //   kelola data
+          const data = {
+            transaction_id: id,
+            discount: discount,
+            total: totalsales,
+          };
+          const databody = { ...item, ...data };
 
-      await stock.putStockQuantity(item.stock_id, newQuantity);
-      // memasukan ke data sales
-      await sales.postSales(databody);
+          // mengurangkan data stock
+          const newQuantity =
+            parseInt(stockdata.quantity) - parseInt(item.quantity);
+
+          await stock.putStockQuantity(item.stock_id, newQuantity);
+          // memasukan ke data sales
+          const result = await sales.postSales(databody);
+          resolve(result);
+        } catch (error) {
+          if (error instanceof ClientError) {
+            if (error.statusCode === 404) {
+              return reject(new NotFoundError(error.message));
+            }
+            return reject(new InvariantError(error.message));
+          }
+          return reject(new Error(error.message));
+        }
+      });
     });
 
+    await checkresult;
     const result = await transaction.postTransaction(id, req.body);
     return response.isSuccessHaveData(
       res,
