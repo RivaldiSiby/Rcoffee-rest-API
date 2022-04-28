@@ -30,7 +30,7 @@ const getTransactions = async (id = null) => {
   if (id === null) {
     const query =
       "SELECT t.id, t.quantity_items, t.costumer, t.coupen, t.delivery_cost, t.tax, t.created_at, t.updated_at, SUM(s.total) AS Item_Total FROM transaction t INNER JOIN sales s on t.id = s.transaction_id GROUP BY t.id";
-    // "select SUM(ss.total) AS totaltransaction FROM sales ss INNER JOIN stock s ON ss.stock_id = s.id inner join product p on ss.product_id  = p.id WHERE ss.transaction_id = $1 group by ss.transaction_id  ";
+
     const result = await dbconect.query(query);
     if (!result.rows.length) {
       throw new NotFoundError("Data Not Found");
@@ -41,7 +41,7 @@ const getTransactions = async (id = null) => {
   const query = "SELECT * FROM transaction WHERE id = $1";
   const result = await dbconect.query(query, [id]);
   if (!result.rows.length) {
-    throw new NotFoundError("Data Not Found");
+    throw new NotFoundError("Transaction Data By Id is Not Found");
   }
   return result.rows[0];
 };

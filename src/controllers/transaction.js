@@ -2,6 +2,8 @@ const transaction = require("../models/transaction");
 const sales = require("../models/sales");
 const stock = require("../models/stock");
 const promos = require("../models/promos");
+const product = require("../models/product");
+const users = require("../models/users");
 const { nanoid } = require("nanoid");
 const response = require("../helper/response");
 const ClientError = require("../exceptions/ClientError");
@@ -12,12 +14,13 @@ const createTransaction = async (req, res) => {
     //   id transaction
     const id = `transaction-${nanoid(16)}`;
     // memasukan data sales ke table
-    const { products, coupon } = req.body;
-
+    const { products, coupon, costumer } = req.body;
+    await users.getUserById(costumer);
     const checkPromos = await promos.getPromosByCoupon(coupon);
 
-    await products.map(async (item) => {
+    products.map(async (item) => {
       //   tarik data stock
+      await product.getJustProductById(item.product_id);
       const stockdata = await stock.getStockById(item.stock_id);
 
       if (stockdata.length === 0) {
@@ -59,6 +62,7 @@ const createTransaction = async (req, res) => {
       // memasukan ke data sales
       await sales.postSales(databody);
     });
+
     const result = await transaction.postTransaction(id, req.body);
     return response.isSuccessHaveData(
       res,
@@ -70,6 +74,7 @@ const createTransaction = async (req, res) => {
     if (error instanceof ClientError) {
       return response.isError(res, error.statusCode, error.message);
     }
+    console.log(error);
     return response.isError(
       res,
       500,

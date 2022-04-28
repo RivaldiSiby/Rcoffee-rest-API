@@ -50,16 +50,21 @@ const postPromos = async (body) => {
 const putPromosById = async (id, body) => {
   const { discount, description, coupon, product_id } = body;
   const updated_at = new Date().toISOString();
+  const haveDiscount =
+    discount !== undefined ? "discount='" + discount + "'," : "";
+  const haveDescription =
+    description !== undefined ? "description='" + description + "'," : "";
+  const haveCoupon = coupon !== undefined ? "coupon='" + coupon + "'," : "";
+  const haveProduct_id =
+    product_id !== undefined ? "product_id='" + product_id + "'," : "";
   const query =
-    "UPDATE promos SET discount=$1, description=$2, coupon=$3, product_id=$4 updated_at=$5 WHERE id=$6 RETURNING id";
-  const result = await dbconect.query(query, [
-    discount,
-    description,
-    coupon,
-    product_id,
-    updated_at,
-    id,
-  ]);
+    "UPDATE promos SET " +
+    haveDiscount +
+    haveDescription +
+    haveCoupon +
+    haveProduct_id +
+    " updated_at=$2 WHERE id=$1 RETURNING id";
+  const result = await dbconect.query(query, [id, updated_at]);
 
   if (!result.rows.length) {
     throw new NotFoundError("failed to update data. Data not Found");

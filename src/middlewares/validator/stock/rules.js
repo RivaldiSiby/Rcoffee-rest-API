@@ -7,9 +7,11 @@ const rulesPost = Joi.object({
   price_unit: Joi.string().required(),
 });
 const rulesPut = Joi.object({
-  size: Joi.string().required(),
-  quantity: Joi.string().required(),
-  price_unit: Joi.string().required(),
+  product_id: Joi.string(),
+  size: Joi.string(),
+  quantity: Joi.string(),
+  price_unit: Joi.string(),
+  add_quantity: Joi.string(),
 });
 
 module.exports = { rulesPost, rulesPut };

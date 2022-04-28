@@ -8,8 +8,8 @@ const { readUsers, readUserById, createUser, editUserById, deleteUserById } =
 
 Router.get("/", readUsers);
 Router.get("/:id", readUserById);
-Router.post("/", usersValidator.validator, createUser);
-Router.put("/:id", usersValidator.validator, editUserById);
+Router.post("/", usersValidator.usersValidatorPost.validator, createUser);
+Router.put("/:id", usersValidator.usersValidatorPut.validator, editUserById);
 Router.delete("/:id", deleteUserById);
 
 module.exports = Router;

@@ -1,10 +1,16 @@
 const Joi = require("joi");
 
-const rulesBody = Joi.object({
+const rulesPost = Joi.object({
   name: Joi.string().required(),
   category: Joi.string().required(),
   description: Joi.string().required(),
   img: Joi.string().required(),
 });
+const rulesPut = Joi.object({
+  name: Joi.string(),
+  category: Joi.string(),
+  description: Joi.string(),
+  img: Joi.string(),
+});
 
-module.exports = { rulesBody };
+module.exports = { rulesPost, rulesPut };

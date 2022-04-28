@@ -9,7 +9,7 @@ const stockValidator = {
     }
     next();
   },
-  validatorPut: (req, res) => {
+  validatorPut: (req, res, next) => {
     const result = rulesPut.validate(req.body);
     if (result.error) {
       throw new InvariantError(result.error.message);

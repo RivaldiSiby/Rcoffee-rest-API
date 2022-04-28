@@ -14,7 +14,7 @@ const getStockById = async (id) => {
   const query = "SELECT * FROM stock WHERE id = $1";
   const result = await dbconect.query(query, [id]);
   if (!result.rows.length) {
-    throw new NotFoundError("Data not Found");
+    throw new NotFoundError("Stock Data By Id is not Found");
   }
   return result.rows[0];
 };
@@ -43,17 +43,24 @@ const postStock = async (body) => {
 };
 
 const putStock = async (id, body) => {
-  const { size, quantity, price_unit } = body;
+  const { size, quantity, price_unit, product_id } = body;
   const updated_at = new Date().toISOString();
+  const haveSize = size !== undefined ? "size='" + size + "'," : "";
+  const havePrice_unit =
+    price_unit !== undefined ? "price_unit='" + price_unit + "'," : "";
+  const haveQuantity =
+    quantity !== undefined ? "quantity='" + quantity + "'," : "";
+  const haveProduct_id =
+    product_id !== undefined ? "product_id='" + product_id + "'," : "";
   const query =
-    "UPDATE stock SET size=$1, quantity=$2, price_unit=$3, updated_at=$4 WHERE id=$5 RETURNING id";
-  const result = await dbconect.query(query, [
-    size,
-    quantity,
-    price_unit,
-    updated_at,
-    id,
-  ]);
+    "UPDATE stock SET " +
+    haveSize +
+    haveQuantity +
+    havePrice_unit +
+    haveProduct_id +
+    " updated_at=$2 WHERE id=$1 RETURNING id";
+  const result = await dbconect.query(query, [id, updated_at]);
+
   if (!result.rows.length) {
     throw new NotFoundError("failed to update data. Data not found");
   }
@@ -85,10 +92,7 @@ const deleteStockByProduct = async (product) => {
   const query = "DELETE FROM stock WHERE product_id = $1 RETURNING id";
   const result = await dbconect.query(query, [product]);
 
-  if (!result.rows.length) {
-    throw new NotFoundError("failed to delete data. Data not found");
-  }
-  return result.rows[0].id;
+  return result.rows;
 };
 
 module.exports = {

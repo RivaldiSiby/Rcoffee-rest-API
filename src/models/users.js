@@ -17,7 +17,7 @@ const getUserById = async (id) => {
     "SELECT id,name,email,phone,date_birth,gender,address FROM users WHERE id = $1 ";
   const result = await dbconect.query(query, [id]);
   if (!result.rows.length) {
-    throw new NotFoundError("Data not Found");
+    throw new NotFoundError("User Data By Id is not Found");
   }
   return result.rows;
 };
@@ -56,28 +56,32 @@ const putUserById = async (id, body) => {
     body;
   const updated_at = new Date().toISOString();
 
-  const hashPassword = await bcrypt.hash(password, 10);
+  const haveName = name !== undefined ? "name='" + name + "'," : "";
+  const haveEmail = email !== undefined ? "email='" + email + "'," : "";
+  let havePassword = "";
+  if (password !== undefined && password.length > 0) {
+    const hashPassword = await bcrypt.hash(password, 10);
+    havePassword = "password='" + hashPassword + "',";
+  }
+  const havePhone = phone !== undefined ? "phone='" + phone + "'," : "";
+  const haveDate_birth =
+    date_birth !== undefined ? "date_birth='" + date_birth + "'," : "";
+  const haveGender = gender !== undefined ? "gender='" + gender + "'," : "";
+  const haveAddress = address !== undefined ? "address='" + address + "'," : "";
+  const haveRole = role !== undefined ? "role='" + role + "'," : "";
 
   const query =
-    "UPDATE users SET name=$1, email=$2, password=$3, phone=$4, date_birth=$5, gender=$6, address=$7,role=$8, updated_at=$9 WHERE id=$10 RETURNING id";
-
-  const values =
-    password.length > 0
-      ? [
-          name,
-          email,
-          hashPassword,
-          phone,
-          date_birth,
-          gender,
-          address,
-          role,
-          updated_at,
-          id,
-        ]
-      : [name, email, phone, date_birth, gender, address, role, updated_at, id];
-
-  const result = await dbconect.query(query, values);
+    "UPDATE users SET " +
+    haveName +
+    haveEmail +
+    havePassword +
+    havePhone +
+    haveDate_birth +
+    haveGender +
+    haveAddress +
+    haveRole +
+    " updated_at=$2 WHERE id=$1 RETURNING id";
+  const result = await dbconect.query(query, [id, updated_at]);
   if (!result.rows.length) {
     throw new NotFoundError("Failed to update data. Data not Found");
   }

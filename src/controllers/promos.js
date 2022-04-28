@@ -1,6 +1,7 @@
 const ClientError = require("../exceptions/ClientError");
 const response = require("../helper/response");
 const promos = require("../models/promos");
+const product = require("../models/product");
 
 const readPromosAll = async (req, res) => {
   try {
@@ -49,6 +50,7 @@ const readPromosById = async (req, res) => {
 
 const createPromos = async (req, res) => {
   try {
+    await product.getJustProductById(req.body.product_id);
     const result = await promos.postPromos(req.body);
     return response.isSuccessHaveData(
       res,

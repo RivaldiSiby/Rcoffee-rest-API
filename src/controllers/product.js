@@ -1,44 +1,11 @@
 const ClientError = require("../exceptions/ClientError");
 const response = require("../helper/response");
 const product = require("../models/product");
+const stock = require("../models/stock");
 
 const readProducts = async (req, res) => {
   try {
-    const { query } = req;
-    const sort = Object.keys(query).find((item) => item === "sort");
-    const order = Object.keys(query).find((item) => item === "order");
-    const byCategory = Object.keys(query).find((item) => item === "category");
-    const byName = Object.keys(query).find((item) => item === "name");
-    if (byName !== undefined) {
-      const result = await product.getProductByName(query.name);
-      return response.isSuccessHaveData(
-        res,
-        200,
-        result,
-        "Read Data By Name has been success"
-      );
-    }
-    if (byCategory !== undefined) {
-      const result = await product.getProductsByCategory(query.category);
-      return response.isSuccessHaveData(
-        res,
-        200,
-        result,
-        "Read All Data By Category has been success"
-      );
-    }
-    if (sort !== undefined && order !== undefined) {
-      let keysort = query.sort.toLowerCase() === "harga" ? "price_unit" : "";
-      keysort = query.sort.toLowerCase() === "waktu" ? "created_at" : keysort;
-      const result = await product.getProductsAll(keysort, query.order);
-      return response.isSuccessHaveData(
-        res,
-        200,
-        result,
-        "Read Data has been success"
-      );
-    }
-    const result = await product.getProductsAll();
+    const result = await product.getProducts(req);
     return response.isSuccessHaveData(
       res,
       200,
@@ -62,7 +29,10 @@ const readProducts = async (req, res) => {
 const readProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await product.getProductById(id);
+    let result = await product.getProductById(id);
+    if (!result.length) {
+      result = await product.getJustProductById(id);
+    }
     return response.isSuccessHaveData(
       res,
       200,
@@ -129,6 +99,7 @@ const deleteProductById = async (req, res) => {
   try {
     const { id } = req.params;
     await product.deleteProductById(id);
+    await stock.deleteStockByProduct(id);
     return response.isSuccessNoData(res, 200, "Delete Data has been success");
   } catch (error) {
     if (error instanceof ClientError) {
