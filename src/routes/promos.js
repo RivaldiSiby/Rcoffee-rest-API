@@ -15,7 +15,7 @@ const {
 Router.get("/", readPromosAll);
 Router.get("/:id", readPromosById);
 Router.post("/", promosValidator.promosValidatorPost.validator, createPromos);
-Router.put(
+Router.patch(
   "/:id",
   promosValidator.promosValidatorPut.validator,
   editPromosById

@@ -98,8 +98,8 @@ const editProductById = async (req, res) => {
 const deleteProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    await product.deleteProductById(id);
     await stock.deleteStockByProduct(id);
+    await product.deleteProductById(id);
     return response.isSuccessNoData(res, 200, "Delete Data has been success");
   } catch (error) {
     if (error instanceof ClientError) {

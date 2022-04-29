@@ -4,7 +4,7 @@ const NotFoundError = require("../exceptions/NotFoundError");
 const dbconect = new Pool();
 
 const postTransaction = async (id, body) => {
-  const { quantity_items, costumer, coupon, delivery_cost, tax } = body;
+  const { quantity_items, user_id, coupon, delivery_cost, tax } = body;
   const created_at = new Date().toISOString();
   const updated_at = created_at;
 
@@ -13,7 +13,7 @@ const postTransaction = async (id, body) => {
   const result = await dbconect.query(query, [
     id,
     quantity_items,
-    costumer,
+    user_id,
     coupon,
     delivery_cost,
     tax,
@@ -29,7 +29,7 @@ const postTransaction = async (id, body) => {
 const getTransactions = async (id = null) => {
   if (id === null) {
     const query =
-      "SELECT t.id, t.quantity_items, t.costumer, t.coupen, t.delivery_cost, t.tax, t.created_at, t.updated_at, SUM(s.total) AS Item_Total FROM transaction t INNER JOIN sales s on t.id = s.transaction_id GROUP BY t.id";
+      "SELECT t.id, t.quantity_items, t.user_id, t.coupon, t.delivery_cost, t.tax, t.created_at, t.updated_at, SUM(s.total) AS Item_Total FROM transaction t INNER JOIN sales s on t.id = s.transaction_id GROUP BY t.id";
 
     const result = await dbconect.query(query);
     if (!result.rows.length) {

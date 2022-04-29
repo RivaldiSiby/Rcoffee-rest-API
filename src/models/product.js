@@ -164,12 +164,16 @@ const putProduct = async (id, body) => {
 };
 
 const deleteProductById = async (id) => {
-  const query = "DELETE FROM product WHERE id = $1 RETURNING id";
-  const result = await dbconect.query(query, [id]);
-  if (!result.rows.length) {
-    throw new NotFoundError("failed to delete data. Data not found");
+  try {
+    const query = "DELETE FROM product WHERE id = $1 RETURNING id";
+    const result = await dbconect.query(query, [id]);
+    if (!result.rows.length) {
+      throw new NotFoundError("failed to delete data. Data not found");
+    }
+    return result.rows[0].id;
+  } catch (error) {
+    throw new Error(error.message);
   }
-  return result.rows[0].id;
 };
 
 module.exports = {

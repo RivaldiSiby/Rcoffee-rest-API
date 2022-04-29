@@ -9,7 +9,7 @@ const { readUsers, readUserById, createUser, editUserById, deleteUserById } =
 Router.get("/", readUsers);
 Router.get("/:id", readUserById);
 Router.post("/", usersValidator.usersValidatorPost.validator, createUser);
-Router.put("/:id", usersValidator.usersValidatorPut.validator, editUserById);
+Router.patch("/:id", usersValidator.usersValidatorPut.validator, editUserById);
 Router.delete("/:id", deleteUserById);
 
 module.exports = Router;

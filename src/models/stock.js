@@ -11,7 +11,8 @@ const getStocksAll = async () => {
 };
 
 const getStockById = async (id) => {
-  const query = "SELECT * FROM stock WHERE id = $1";
+  const query =
+    "SELECT s.id ,p.name ,s.product_id ,s.size ,s.quantity ,s.price_unit ,s.created_at ,s.updated_at  FROM stock s INNER JOIN product p ON s.product_id = p.id WHERE s.id = $1";
   const result = await dbconect.query(query, [id]);
   if (!result.rows.length) {
     throw new NotFoundError("Stock Data By Id is not Found");

@@ -21,7 +21,7 @@ Router.post(
   productValidator.productValidatorPost.validator,
   createProduct
 );
-Router.put(
+Router.patch(
   "/:id",
   productValidator.productValidatorPut.validator,
   editProductById

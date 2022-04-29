@@ -15,15 +15,14 @@ const createTransaction = async (req, res) => {
     //   id transaction
     const id = `transaction-${nanoid(16)}`;
     // memasukan data sales ke table
-    const { products, coupon, costumer } = req.body;
-    await users.getUserById(costumer);
+    const { products, coupon, user_id } = req.body;
+    await users.getUserById(user_id);
     const checkPromos = await promos.getPromosByCoupon(coupon);
-
+    console.log(checkPromos);
     const checkresult = new Promise((resolve, reject) => {
       // mengola data dan operasi
       products.map(async (item) => {
         try {
-          await product.getJustProductById(item.product_id);
           const stockdata = await stock.getStockById(item.stock_id);
 
           if (stockdata.length === 0) {
@@ -44,10 +43,11 @@ const createTransaction = async (req, res) => {
           if (checkPromos !== undefined) {
             // cek apakah product yang dipilih terdaftar disuatu promo
             discount =
-              checkPromos.product_id === item.product_id
+              checkPromos.product_id === stockdata.product_id
                 ? checkPromos.discount
                 : null;
-
+            console.log(discount);
+            console.log(checkPromos.product_id, stockdata.product_id);
             // cek discount jika ada kurangkan total dengan discount
             totalsales =
               discount !== null
@@ -57,7 +57,6 @@ const createTransaction = async (req, res) => {
           //   kelola data
           const data = {
             transaction_id: id,
-            discount: discount,
             total: totalsales,
           };
           const databody = { ...item, ...data };
