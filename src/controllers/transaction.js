@@ -18,26 +18,25 @@ const createTransaction = async (req, res) => {
     const { products, coupon, user_id } = req.body;
     await users.getUserById(user_id);
     const checkPromos = await promos.getPromosByCoupon(coupon);
-    console.log(checkPromos);
-    const checkresult = new Promise((resolve, reject) => {
+    const checkresult = new Promise(async (resolve, reject) => {
       // mengola data dan operasi
-      products.map(async (item) => {
+
+      let datasales = [];
+      await products.map(async (item) => {
         try {
           const stockdata = await stock.getStockById(item.stock_id);
 
-          if (stockdata.length === 0) {
-            throw new InvariantError("stock_id is invalid");
-          }
           // mengecek jumlah data stock
-          if (
-            parseInt(stockdata.quantity) < 1 ||
-            parseInt(item.quantity) > parseInt(stockdata.quantity)
-          ) {
-            throw new InvariantError("out of stock product");
+          if (stockdata !== undefined) {
+            if (
+              stockdata.quantity < 1 ||
+              parseInt(item.quantity) > stockdata.quantity
+            ) {
+              throw new InvariantError("out of stock product");
+            }
           }
           //   total price sales
-          let totalsales =
-            parseInt(item.quantity) * parseInt(stockdata.price_unit);
+          let totalsales = parseInt(item.quantity) * stockdata.price;
           //   cek coupon promos
           let discount;
           if (checkPromos !== undefined) {
@@ -46,29 +45,28 @@ const createTransaction = async (req, res) => {
               checkPromos.product_id === stockdata.product_id
                 ? checkPromos.discount
                 : null;
-            console.log(discount);
-            console.log(checkPromos.product_id, stockdata.product_id);
+
             // cek discount jika ada kurangkan total dengan discount
             totalsales =
               discount !== null
                 ? totalsales - parseFloat(discount) * totalsales
                 : totalsales;
           }
+          // mengurangkan data stock
+          const newQuantity = stockdata.quantity - parseInt(item.quantity);
+
           //   kelola data
           const data = {
             transaction_id: id,
+            newQuantity: newQuantity,
             total: totalsales,
           };
           const databody = { ...item, ...data };
-
-          // mengurangkan data stock
-          const newQuantity =
-            parseInt(stockdata.quantity) - parseInt(item.quantity);
-
-          await stock.putStockQuantity(item.stock_id, newQuantity);
-          // memasukan ke data sales
-          const result = await sales.postSales(databody);
-          resolve(result);
+          datasales.push(databody);
+          // akan resolve ketika pengecekan berhasil
+          if (datasales.length === products.length) {
+            resolve(datasales);
+          }
         } catch (error) {
           if (error instanceof ClientError) {
             if (error.statusCode === 404) {
@@ -80,15 +78,25 @@ const createTransaction = async (req, res) => {
         }
       });
     });
-
-    await checkresult;
-    const result = await transaction.postTransaction(id, req.body);
-    return response.isSuccessHaveData(
-      res,
-      201,
-      { id: result },
-      "Create Data Transaction has been success"
-    );
+    const salesdata = await checkresult;
+    // ketika pengecekan data aman
+    if (salesdata.length === products.length) {
+      // memasukan data sales
+      await salesdata.map(async (item) => {
+        // mengurangkan stock berdasarkan jumlah yang dibeli
+        await stock.putStockQuantity(item.stock_id, item.newQuantity);
+        // memasukan ke data sales
+        await sales.postSales(item);
+      });
+      // memasukan data transaction
+      const result = await transaction.postTransaction(id, req.body);
+      return response.isSuccessHaveData(
+        res,
+        201,
+        { id: result },
+        "Create Data Transaction has been success"
+      );
+    }
   } catch (error) {
     if (error instanceof ClientError) {
       return response.isError(res, error.statusCode, error.message);
@@ -112,6 +120,18 @@ const readDetailTransactionById = async (req, res) => {
     let total = parseInt(
       salesResult.find((item) => item.item_total).item_total
     );
+    // cek discount
+    let i = 0;
+    //cek apakah coupon terpakai dalam suatu produk
+    salesResult.map((item) => {
+      i += 1;
+      // kondisi agar item coupon dan discount tidak masuk dalam item total
+      if (i < salesResult.length) {
+        item.discount =
+          item.coupon === transactionResult.coupon ? item.discount : null;
+        item.coupon = item.discount !== null ? item.coupon : null;
+      }
+    });
     total = parseFloat(transactionResult.tax) * total + total;
     total = total + parseInt(transactionResult.delivery_cost);
     const data = {

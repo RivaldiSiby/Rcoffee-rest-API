@@ -77,7 +77,7 @@ const editStockById = async (req, res) => {
 
     if (isAddQuantity !== undefined) {
       const result = await stock.getStockById(id);
-      const quantity = parseInt(result.quantity) + parseInt(body.add_quantity);
+      const quantity = result.quantity + parseInt(body.add_quantity);
       await stock.putStockQuantity(id, quantity);
       return response.isSuccessNoData(
         res,
