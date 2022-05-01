@@ -1,5 +1,6 @@
 const { nanoid } = require("nanoid");
 const { Pool } = require("pg");
+const ClientError = require("../exceptions/ClientError");
 const InvariantError = require("../exceptions/InvariantError");
 const NotFoundError = require("../exceptions/NotFoundError");
 const dbconect = new Pool();
@@ -10,6 +11,12 @@ const getStocksAll = async () => {
     const result = await dbconect.query(query);
     return result;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -24,6 +31,12 @@ const getStockById = async (id) => {
     }
     return result.rows[0];
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -52,39 +65,48 @@ const postStock = async (body) => {
     }
     return result.rows[0].id;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
 
-const putStock = async (id, body) => {
+const patchStock = async (id, body) => {
   try {
     const { size, quantity, price, product_id } = body;
     const updated_at = new Date().toISOString();
-    const haveSize = size !== undefined ? "size='" + size + "'," : "";
-    const haveprice = price !== undefined ? "price='" + price + "'," : "";
-    const haveQuantity =
-      quantity !== undefined ? "quantity='" + quantity + "'," : "";
-    const haveProduct_id =
-      product_id !== undefined ? "product_id='" + product_id + "'," : "";
+
     const query =
-      "UPDATE stock SET " +
-      haveSize +
-      haveQuantity +
-      haveprice +
-      haveProduct_id +
-      " updated_at=$2 WHERE id=$1 RETURNING id";
-    const result = await dbconect.query(query, [id, updated_at]);
+      "UPDATE stock SET product_id=$1, size=$2, quantity=$3, price=$4, updated_at=$5 WHERE id=$6 RETURNING id";
+    const result = await dbconect.query(query, [
+      product_id,
+      size,
+      quantity,
+      price,
+      updated_at,
+      id,
+    ]);
 
     if (!result.rows.length) {
       throw new NotFoundError("failed to update data. Data not found");
     }
     return result.rows[0].id;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
 
-const putStockQuantity = async (id, quantity) => {
+const patchStockQuantity = async (id, quantity) => {
   try {
     const updated_at = new Date().toISOString();
     const query =
@@ -96,6 +118,12 @@ const putStockQuantity = async (id, quantity) => {
     }
     return result.rows[0].id;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -110,6 +138,12 @@ const deleteStockById = async (id) => {
     }
     return result.rows[0].id;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -120,6 +154,12 @@ const deleteStockByProduct = async (product) => {
 
     return result.rows;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -128,8 +168,8 @@ module.exports = {
   getStockById,
   getStocksAll,
   postStock,
-  putStock,
+  patchStock,
   deleteStockById,
-  putStockQuantity,
+  patchStockQuantity,
   deleteStockByProduct,
 };

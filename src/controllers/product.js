@@ -79,7 +79,17 @@ const createProduct = async (req, res) => {
 const editProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    await product.putProduct(id, req.body);
+    let data = await product.getProductById(id);
+    // atur data patch
+    data[0].name = req.body.name !== undefined ? req.body.name : data[0].name;
+    data[0].description =
+      req.body.description !== undefined
+        ? req.body.description
+        : data[0].description;
+    data[0].category =
+      req.body.category !== undefined ? req.body.category : data[0].category;
+    data[0].img = req.body.img !== undefined ? req.body.img : data[0].img;
+    await product.patchProduct(id, data[0]);
     return response.isSuccessNoData(res, 200, "Update Data has been success");
   } catch (error) {
     if (error instanceof ClientError) {

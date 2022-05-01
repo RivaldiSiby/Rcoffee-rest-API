@@ -1,5 +1,6 @@
 const { nanoid } = require("nanoid");
 const { Pool } = require("pg");
+const ClientError = require("../exceptions/ClientError");
 const InvariantError = require("../exceptions/InvariantError");
 const NotFoundError = require("../exceptions/NotFoundError");
 const dbconect = new Pool();
@@ -23,6 +24,12 @@ const postSales = async (body) => {
     }
     return result.rows[0].id;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -51,6 +58,12 @@ const getSalesByTransaction = async (transaction) => {
 
     return result.rows;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -76,6 +89,12 @@ const getSales = async (id = null) => {
     }
     return result.rows;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -91,6 +110,12 @@ const deleteSalesByTransaction = async (transaction) => {
     }
     return result.rows;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };

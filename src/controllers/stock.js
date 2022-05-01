@@ -78,15 +78,22 @@ const editStockById = async (req, res) => {
     if (isAddQuantity !== undefined) {
       const result = await stock.getStockById(id);
       const quantity = result.quantity + parseInt(body.add_quantity);
-      await stock.putStockQuantity(id, quantity);
+      await stock.patchStockQuantity(id, quantity);
       return response.isSuccessNoData(
         res,
         200,
         "Add Data Quantity has been success"
       );
     }
-
-    await stock.putStock(id, req.body);
+    let data = await stock.getStockById(id);
+    // atur data patch
+    data.size = req.body.size !== undefined ? req.body.size : data.size;
+    data.quantity =
+      req.body.quantity !== undefined ? req.body.quantity : data.quantity;
+    data.price = req.body.price !== undefined ? req.body.price : data.price;
+    data.product_id =
+      req.body.product_id !== undefined ? req.body.product_id : data.product_id;
+    await stock.patchStock(id, data);
     return response.isSuccessNoData(res, 200, "Update Data has been success");
   } catch (error) {
     if (error instanceof ClientError) {

@@ -1,15 +1,21 @@
 const { nanoid } = require("nanoid");
 const { Pool } = require("pg");
+const ClientError = require("../exceptions/ClientError");
 const InvariantError = require("../exceptions/InvariantError");
 const NotFoundError = require("../exceptions/NotFoundError");
 const dbconect = new Pool();
-
 const getPromosAll = async () => {
   try {
     const query = "SELECT * FROM promos";
     const result = await dbconect.query(query);
     return result;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -24,6 +30,12 @@ const getPromosById = async (id) => {
     }
     return result.rows[0];
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -34,6 +46,12 @@ const getPromosByCoupon = async (coupon) => {
 
     return result.rows[0];
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -60,35 +78,42 @@ const postPromos = async (body) => {
     }
     return result.rows[0].id;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
 
-const putPromosById = async (id, body) => {
+const patchPromosById = async (id, body) => {
   try {
     const { discount, description, coupon, product_id } = body;
     const updated_at = new Date().toISOString();
-    const haveDiscount =
-      discount !== undefined ? "discount='" + discount + "'," : "";
-    const haveDescription =
-      description !== undefined ? "description='" + description + "'," : "";
-    const haveCoupon = coupon !== undefined ? "coupon='" + coupon + "'," : "";
-    const haveProduct_id =
-      product_id !== undefined ? "product_id='" + product_id + "'," : "";
     const query =
-      "UPDATE promos SET " +
-      haveDiscount +
-      haveDescription +
-      haveCoupon +
-      haveProduct_id +
-      " updated_at=$2 WHERE id=$1 RETURNING id";
-    const result = await dbconect.query(query, [id, updated_at]);
+      "UPDATE promos SET discount=$1, description=$2, coupon=$3, product_id=$4, updated_at=$5 WHERE id=$6 RETURNING id";
+    const result = await dbconect.query(query, [
+      discount,
+      description,
+      coupon,
+      product_id,
+      updated_at,
+      id,
+    ]);
 
     if (!result.rows.length) {
       throw new NotFoundError("failed to update data. Data not Found");
     }
     return result.rows[0].id;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -103,6 +128,12 @@ const deletePromosById = async (id) => {
     }
     return result.rows[0].id;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -111,7 +142,7 @@ module.exports = {
   getPromosAll,
   getPromosById,
   postPromos,
-  putPromosById,
+  patchPromosById,
   deletePromosById,
   getPromosByCoupon,
 };

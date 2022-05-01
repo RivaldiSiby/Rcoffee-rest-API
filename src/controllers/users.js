@@ -60,7 +60,25 @@ const createUser = async (req, res) => {
 const editUserById = async (req, res) => {
   try {
     const { id } = req.params;
-    await users.putUserById(id, req.body);
+    let data = await users.getUserByIdAllData(id);
+    // atur data patch
+    data[0].name = req.body.name !== undefined ? req.body.name : data[0].name;
+    data[0].email =
+      req.body.email !== undefined ? req.body.email : data[0].email;
+    data[0].password =
+      req.body.password !== undefined ? req.body.password : data[0].password;
+    data[0].phone =
+      req.body.phone !== undefined ? req.body.phone : data[0].phone;
+    data[0].date_birth =
+      req.body.date_birth !== undefined
+        ? req.body.date_birth
+        : data[0].date_birth;
+    data[0].gender =
+      req.body.gender !== undefined ? req.body.gender : data[0].gender;
+    data[0].address =
+      req.body.address !== undefined ? req.body.address : data[0].address;
+    data[0].role = req.body.role !== undefined ? req.body.role : data[0].role;
+    await users.patchUserById(id, data[0]);
     return response.isSuccessNoData(res, 200, "Update Data has been success");
   } catch (error) {
     if (error instanceof ClientError) {

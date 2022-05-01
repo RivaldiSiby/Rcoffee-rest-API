@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const { Pool } = require("pg");
 const InvariantError = require("../exceptions/InvariantError");
 const NotFoundError = require("../exceptions/NotFoundError");
+const ClientError = require("../exceptions/ClientError");
 const dbconect = new Pool();
 
 const getUsers = async () => {
@@ -12,6 +13,12 @@ const getUsers = async () => {
     const result = await dbconect.query(query);
     return result;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -26,6 +33,30 @@ const getUserById = async (id) => {
     }
     return result.rows;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
+    throw new Error(error.message);
+  }
+};
+const getUserByIdAllData = async (id) => {
+  try {
+    const query = "SELECT * FROM users WHERE id = $1 ";
+    const result = await dbconect.query(query, [id]);
+    if (!result.rows.length) {
+      throw new NotFoundError("User Data By Id is not Found");
+    }
+    return result.rows;
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -59,48 +90,48 @@ const postUser = async (body) => {
     }
     return result.rows[0].id;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
 
-const putUserById = async (id, body) => {
+const patchUserById = async (id, body) => {
   try {
     const { name, email, password, phone, date_birth, gender, address, role } =
       body;
+    const hashPassword =
+      password.length >= 60 ? password : await bcrypt.hash(password, 10);
     const updated_at = new Date().toISOString();
-
-    const haveName = name !== undefined ? "name='" + name + "'," : "";
-    const haveEmail = email !== undefined ? "email='" + email + "'," : "";
-    let havePassword = "";
-    if (password !== undefined && password.length > 0) {
-      const hashPassword = await bcrypt.hash(password, 10);
-      havePassword = "password='" + hashPassword + "',";
-    }
-    const havePhone = phone !== undefined ? "phone='" + phone + "'," : "";
-    const haveDate_birth =
-      date_birth !== undefined ? "date_birth='" + date_birth + "'," : "";
-    const haveGender = gender !== undefined ? "gender='" + gender + "'," : "";
-    const haveAddress =
-      address !== undefined ? "address='" + address + "'," : "";
-    const haveRole = role !== undefined ? "role='" + role + "'," : "";
-
     const query =
-      "UPDATE users SET " +
-      haveName +
-      haveEmail +
-      havePassword +
-      havePhone +
-      haveDate_birth +
-      haveGender +
-      haveAddress +
-      haveRole +
-      " updated_at=$2 WHERE id=$1 RETURNING id";
-    const result = await dbconect.query(query, [id, updated_at]);
+      "UPDATE users SET name=$1, email=$2, password=$3, phone=$4, date_birth=$5, gender=$6, address=$7, role=$8, updated_at=$9 WHERE id=$10 RETURNING id";
+    const result = await dbconect.query(query, [
+      name,
+      email,
+      hashPassword,
+      phone,
+      date_birth,
+      gender,
+      address,
+      role,
+      updated_at,
+      id,
+    ]);
     if (!result.rows.length) {
       throw new NotFoundError("Failed to update data. Data not Found");
     }
     return result.rows[0].id;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -114,6 +145,12 @@ const deleteUserById = async (id) => {
     }
     return result.rows[0].id;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -121,7 +158,8 @@ const deleteUserById = async (id) => {
 module.exports = {
   getUsers,
   getUserById,
+  getUserByIdAllData,
   postUser,
-  putUserById,
+  patchUserById,
   deleteUserById,
 };

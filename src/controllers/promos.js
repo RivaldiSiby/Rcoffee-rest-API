@@ -74,14 +74,25 @@ const createPromos = async (req, res) => {
 const editPromosById = async (req, res) => {
   try {
     const { id } = req.params;
-
-    await promos.putPromosById(id, req.body);
+    let data = await promos.getPromosById(id);
+    // atur data patch
+    data.discount =
+      req.body.discount !== undefined ? req.body.discount : data.discount;
+    data.description =
+      req.body.description !== undefined
+        ? req.body.description
+        : data.description;
+    data.coupon = req.body.coupon !== undefined ? req.body.coupon : data.coupon;
+    data.product_id =
+      req.body.product_id !== undefined ? req.body.product_id : data.product_id;
+    await promos.patchPromosById(id, data);
     return response.isSuccessNoData(res, 200, "Update Data has been success");
   } catch (error) {
     if (error instanceof ClientError) {
       return response.isError(res, error.statusCode, error.message);
     }
     // server error
+    console.log(error);
     return response.isError(
       res,
       500,

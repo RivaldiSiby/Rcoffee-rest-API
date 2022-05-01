@@ -1,4 +1,5 @@
 const { Pool } = require("pg");
+const ClientError = require("../exceptions/ClientError");
 const InvariantError = require("../exceptions/InvariantError");
 const NotFoundError = require("../exceptions/NotFoundError");
 const dbconect = new Pool();
@@ -25,6 +26,12 @@ const postTransaction = async (id, body) => {
     }
     return result.rows[0].id;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -49,6 +56,12 @@ const getTransactions = async (id = null) => {
     }
     return result.rows[0];
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -64,6 +77,12 @@ const deleteTransactionById = async (id) => {
     }
     return result.rows;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };

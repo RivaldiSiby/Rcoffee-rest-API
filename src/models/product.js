@@ -1,5 +1,6 @@
 const { nanoid } = require("nanoid");
 const { Pool } = require("pg");
+const ClientError = require("../exceptions/ClientError");
 const InvariantError = require("../exceptions/InvariantError");
 const NotFoundError = require("../exceptions/NotFoundError");
 const dbconect = new Pool();
@@ -58,28 +59,22 @@ const getProducts = async (req) => {
       querySort = "ORDER BY " + valueSort + " " + valueOrder;
     }
     const querySQL =
-      "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p INNER JOIN stock s ON p.id  = s.product_id ";
-    const fixSQL = querySQL + queryFilter + querySort;
-    const result = await dbconect.query(fixSQL);
+      "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p INNER JOIN stock s ON p.id  = s.product_id $1 $2 ";
+    // const fixSQL = querySQL + queryFilter + querySort;
+    // console.log(querySQL, queryFilter, querySort);
+    const tes = "tes";
+    const result = await dbconect.query(querySQL, [tes, querySort]);
     if (!result.rows.length) {
       throw new NotFoundError("Data is Not Found");
     }
     return result.rows;
   } catch (error) {
-    throw new Error(error.message);
-  }
-};
-
-const getProductByName = async (name) => {
-  try {
-    const query =
-      "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, p.updated_at, s.size, s.quantity, s.price FROM product p INNER JOIN stock s ON p.id  = s.product_id WHERE lower(name) LIKE lower('%' || $1 || '%')  ORDER BY price DESC";
-    const result = await dbconect.query(query, [name]);
-    if (!result.rows.length) {
-      throw new NotFoundError("Search Data By Name is Not Found");
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
     }
-    return result.rows;
-  } catch (error) {
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -87,11 +82,19 @@ const getProductByName = async (name) => {
 const getProductById = async (id) => {
   try {
     const query =
-      "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, p.updated_at, s.size, s.quantity, s.price FROM product p INNER JOIN stock s ON p.id  = s.product_id WHERE p.id = $1 ORDER BY price DESC";
+      "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, p.updated_at, s.size, s.quantity, s.price FROM product p LEFT JOIN stock s ON p.id  = s.product_id WHERE p.id = $1 ORDER BY price DESC";
     const result = await dbconect.query(query, [id]);
-
+    if (!result.rows.length) {
+      throw new NotFoundError("Product Data By Id is Not Found");
+    }
     return result.rows;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -104,6 +107,12 @@ const getJustProductById = async (id) => {
     }
     return result.rows[0];
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -132,33 +141,45 @@ const postProduct = async (body) => {
     }
     return result.rows[0];
   } catch (error) {
+    if (error instanceof ClientError) {
+      return response.isError(res, error.statusCode, error.message);
+    }
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
 
-const putProduct = async (id, body) => {
+const patchProduct = async (id, body) => {
   try {
     const { name, description, category, img } = body;
     const updated_at = new Date().toISOString();
-    const haveName = name !== undefined ? "name='" + name + "'," : "";
-    const haveDescription =
-      description !== undefined ? "description='" + description + "'," : "";
-    const haveCategory =
-      category !== undefined ? "category='" + category + "'," : "";
-    const haveImg = img !== undefined ? "img='" + img + "'," : "";
+
     const query =
-      "UPDATE product SET " +
-      haveName +
-      haveDescription +
-      haveCategory +
-      haveImg +
-      " updated_at=$2 WHERE id=$1 RETURNING id";
-    const result = await dbconect.query(query, [id, updated_at]);
+      "UPDATE product SET name=$1, category=$2, description=$3, img=$4, updated_at=$5 WHERE id=$6 RETURNING id";
+    const result = await dbconect.query(query, [
+      name,
+      description,
+      category,
+      img,
+      updated_at,
+      id,
+    ]);
     if (!result.rows.length) {
       throw new NotFoundError("failed to update data. Data not found");
     }
     return result.rows[0].id;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -172,6 +193,12 @@ const deleteProductById = async (id) => {
     }
     return result.rows[0].id;
   } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
     throw new Error(error.message);
   }
 };
@@ -179,9 +206,8 @@ const deleteProductById = async (id) => {
 module.exports = {
   getProductById,
   postProduct,
-  putProduct,
+  patchProduct,
   deleteProductById,
-  getProductByName,
   getJustProductById,
   getProducts,
 };
