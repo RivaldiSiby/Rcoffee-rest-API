@@ -6,7 +6,7 @@ const rulesPost = Joi.object({
   quantity: Joi.string().required(),
   price: Joi.string().required(),
 });
-const rulesPut = Joi.object({
+const rulesPatch = Joi.object({
   product_id: Joi.string(),
   size: Joi.string(),
   quantity: Joi.string(),
@@ -14,4 +14,4 @@ const rulesPut = Joi.object({
   add_quantity: Joi.string(),
 });
 
-module.exports = { rulesPost, rulesPut };
+module.exports = { rulesPost, rulesPatch };

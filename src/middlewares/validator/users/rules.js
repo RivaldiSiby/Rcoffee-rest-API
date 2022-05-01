@@ -11,7 +11,7 @@ const rulesPost = Joi.object({
   role: Joi.string().required(),
   description: Joi.string().required(),
 });
-const rulesPut = Joi.object({
+const rulesPatch = Joi.object({
   name: Joi.string(),
   email: Joi.string().email(),
   password: Joi.string(),
@@ -23,4 +23,4 @@ const rulesPut = Joi.object({
   description: Joi.string(),
 });
 
-module.exports = { rulesPut, rulesPost };
+module.exports = { rulesPatch, rulesPost };

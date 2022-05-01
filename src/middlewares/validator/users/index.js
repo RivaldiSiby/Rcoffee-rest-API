@@ -1,6 +1,6 @@
 const InvariantError = require("../../../exceptions/InvariantError");
 const response = require("../../../helper/response");
-const { rulesPost, rulesPut } = require("./rules");
+const { rulesPost, rulesPatch } = require("./rules");
 
 const usersValidatorPost = {
   validator: (req, res, next) => {
@@ -11,9 +11,9 @@ const usersValidatorPost = {
     next();
   },
 };
-const usersValidatorPut = {
+const usersValidatorPatch = {
   validator: (req, res, next) => {
-    const result = rulesPut.validate(req.body);
+    const result = rulesPatch.validate(req.body);
     if (result.error) {
       return response.isError(res, 400, result.error.message);
     }
@@ -21,4 +21,4 @@ const usersValidatorPut = {
   },
 };
 
-module.exports = { usersValidatorPost, usersValidatorPut };
+module.exports = { usersValidatorPost, usersValidatorPatch };

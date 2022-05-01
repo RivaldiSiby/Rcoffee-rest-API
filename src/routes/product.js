@@ -23,7 +23,7 @@ Router.post(
 );
 Router.patch(
   "/:id",
-  productValidator.productValidatorPut.validator,
+  productValidator.productValidatorPatch.validator,
   editProductById
 );
 Router.delete("/:id", deleteProductById);

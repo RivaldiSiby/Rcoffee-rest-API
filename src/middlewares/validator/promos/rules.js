@@ -6,11 +6,11 @@ const rulesPost = Joi.object({
   coupon: Joi.string().required(),
   product_id: Joi.string(),
 });
-const rulesPut = Joi.object({
+const rulesPatch = Joi.object({
   discount: Joi.string(),
   description: Joi.string(),
   coupon: Joi.string(),
   product_id: Joi.string(),
 });
 
-module.exports = { rulesPost, rulesPut };
+module.exports = { rulesPost, rulesPatch };

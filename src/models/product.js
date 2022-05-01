@@ -1,4 +1,5 @@
 const { nanoid } = require("nanoid");
+const { sql } = require("node-pg-migrate/dist/operations/other");
 const { Pool } = require("pg");
 const ClientError = require("../exceptions/ClientError");
 const InvariantError = require("../exceptions/InvariantError");
@@ -13,59 +14,53 @@ const getProducts = async (req) => {
     const bySort = Object.keys(query).find((item) => item === "sort");
     const byOrder = Object.keys(query).find((item) => item === "order");
 
-    let queryFilter = "";
+    let querySQL = {
+      text: "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p LEFT JOIN stock s ON p.id  = s.product_id ",
+      values: [],
+    };
+    // ketika difilter dengan nama dan catagory
     if (byName !== undefined && byCategory !== undefined) {
-      queryFilter =
-        "WHERE lower(" +
-        byName +
-        ") LIKE lower('%' || '" +
-        query.name +
-        "' || '%') AND lower(" +
-        byCategory +
-        ") LIKE lower('%' || '" +
-        query.category +
-        "' || '%') ";
+      querySQL = {
+        text: "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p LEFT JOIN stock s ON p.id  = s.product_id WHERE lower(name) LIKE lower('%' || $1 || '%') AND lower(category) LIKE lower('%' || $2 || '%') ",
+        values: [query.name, query.category],
+      };
     }
+    // ketika difilter dengan nama  atau catagory
     if (byName !== undefined || byCategory !== undefined) {
       let filterkey = byName !== undefined ? "name" : "category";
       let filtervalue = query.name !== undefined ? query.name : query.category;
-      queryFilter =
-        "WHERE lower(" +
-        filterkey +
-        ") LIKE lower('%' || '" +
-        filtervalue +
-        "' || '%')   ";
+      if (filterkey === "name") {
+        // pengecekan order by desc / asc
+        querySQL = {
+          text: "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p LEFT JOIN stock s ON p.id  = s.product_id WHERE lower(name) LIKE lower('%' || $1 || '%')",
+          values: [filtervalue],
+        };
+      } else {
+        querySQL = {
+          text: "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p LEFT JOIN stock s ON p.id  = s.product_id WHERE lower(category) LIKE lower('%' || $1 || '%')",
+          values: [filtervalue],
+        };
+      }
     }
-    let querySort = "";
+
+    // mengambil data sort dan order
+    let sort = "id";
+    let order = "ASC";
     if (bySort !== undefined && byOrder !== undefined) {
-      let valueSort = query.sort;
-      let valueOrder = query.order;
-      if (
-        valueSort.toLowerCase() !== "time" &&
-        valueSort.toLowerCase() !== "price"
-      ) {
+      // cek isi query sortir
+      if (query.sort !== "time" && query.sort !== "price") {
         throw new InvariantError("Value Sort is not valid");
       }
-      if (
-        valueOrder.toLowerCase() !== "asc" &&
-        valueOrder.toLowerCase() !== "desc"
-      ) {
-        throw new InvariantError("Value Order is not valid");
-      }
+      sort = query.sort === "time" ? "created_at" : sort;
+      sort = query.sort === "price" ? "price" : sort;
+      order = query.order === "desc" ? "DESC" : "ASC";
 
-      valueSort = valueSort.toLowerCase() === "time" ? "created_at" : valueSort;
-      valueSort = valueSort.toLowerCase() === "price" ? "price" : valueSort;
-      valueOrder = valueOrder.toLowerCase() === "asc" ? "ASC" : "DESC";
-      querySort = "ORDER BY " + valueSort + " " + valueOrder;
+      querySQL.text += " ORDER BY " + sort + " " + order;
     }
-    const querySQL =
-      "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p INNER JOIN stock s ON p.id  = s.product_id $1 $2 ";
-    // const fixSQL = querySQL + queryFilter + querySort;
-    // console.log(querySQL, queryFilter, querySort);
-    const tes = "tes";
-    const result = await dbconect.query(querySQL, [tes, querySort]);
+
+    const result = await dbconect.query(querySQL);
     if (!result.rows.length) {
-      throw new NotFoundError("Data is Not Found");
+      throw new NotFoundError(`Data is Not Found`);
     }
     return result.rows;
   } catch (error) {

@@ -17,7 +17,7 @@ Router.get("/:id", readPromosById);
 Router.post("/", promosValidator.promosValidatorPost.validator, createPromos);
 Router.patch(
   "/:id",
-  promosValidator.promosValidatorPut.validator,
+  promosValidator.promosValidatorPatch.validator,
   editPromosById
 );
 Router.delete("/:id", deletePromosById);

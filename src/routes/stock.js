@@ -15,7 +15,7 @@ const {
 Router.get("/", readStocks);
 Router.get("/:id", readStockById);
 Router.post("/", stockValidator.validatorPost, createdNewStock);
-Router.patch("/:id", stockValidator.validatorPut, editStockById);
+Router.patch("/:id", stockValidator.validatorPatch, editStockById);
 Router.delete("/:id", deleteStockById);
 
 module.exports = Router;
