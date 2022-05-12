@@ -84,7 +84,7 @@ const createTransaction = async (req, res) => {
       // memasukan data sales
       await salesdata.map(async (item) => {
         // mengurangkan stock berdasarkan jumlah yang dibeli
-        await stock.putStockQuantity(item.stock_id, item.newQuantity);
+        await stock.patchStockQuantity(item.stock_id, item.newQuantity);
         // memasukan ke data sales
         await sales.postSales(item);
       });

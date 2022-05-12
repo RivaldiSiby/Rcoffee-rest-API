@@ -3,38 +3,30 @@
 exports.shorthands = undefined;
 
 exports.up = (pgm) => {
-  pgm.createTable("stock", {
+  pgm.createTable("sales", {
     id: {
       type: "VARCHAR(50)",
       primaryKey: true,
     },
-    product_id: {
-      type: "VARCHAR(50)",
+    stock_id: {
+      type: "VARCHAR(100)",
       notNull: true,
     },
-    size: {
+    transaction_id: {
       type: "VARCHAR(100)",
       notNull: true,
     },
     quantity: {
-      type: "VARCHAR(50)",
+      type: "INTEGER",
       notNull: true,
     },
-    price_unit: {
-      type: "VARCHAR(100)",
-      notNull: true,
-    },
-    created_at: {
-      type: "VARCHAR(255)",
-      notNull: true,
-    },
-    updated_at: {
-      type: "VARCHAR(255)",
+    total: {
+      type: "INTEGER",
       notNull: true,
     },
   });
 };
 
 exports.down = (pgm) => {
-  pgm.dropTable("stock");
+  pgm.dropTable("sales");
 };
