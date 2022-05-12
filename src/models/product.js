@@ -1,5 +1,5 @@
 const { nanoid } = require("nanoid");
-const { sql } = require("node-pg-migrate/dist/operations/other");
+
 const { Pool } = require("pg");
 const ClientError = require("../exceptions/ClientError");
 const InvariantError = require("../exceptions/InvariantError");

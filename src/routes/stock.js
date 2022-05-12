@@ -11,11 +11,24 @@ const {
   editStockById,
   deleteStockById,
 } = stockController;
+const auth = require("../middlewares/auth/auth");
 
-Router.get("/", readStocks);
-Router.get("/:id", readStockById);
-Router.post("/", stockValidator.validatorPost, createdNewStock);
-Router.patch("/:id", stockValidator.validatorPatch, editStockById);
-Router.delete("/:id", deleteStockById);
+Router.get("/", auth.checkToken, auth.checkRole, readStocks);
+Router.get("/:id", auth.checkToken, auth.checkRole, readStockById);
+Router.post(
+  "/",
+  auth.checkToken,
+  auth.checkRole,
+  stockValidator.validatorPost,
+  createdNewStock
+);
+Router.patch(
+  "/:id",
+  auth.checkToken,
+  auth.checkRole,
+  stockValidator.validatorPatch,
+  editStockById
+);
+Router.delete("/:id", auth.checkToken, auth.checkRole, deleteStockById);
 
 module.exports = Router;

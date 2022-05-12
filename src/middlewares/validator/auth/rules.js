@@ -1,6 +1,6 @@
 const Joi = require("joi");
 
-const rulesPost = Joi.object({
+const rulesRegis = Joi.object({
   name: Joi.string().required(),
   email: Joi.string().email().required(),
   password: Joi.string().min(8).required(),
@@ -11,16 +11,9 @@ const rulesPost = Joi.object({
   role: Joi.string().required(),
   description: Joi.string().required(),
 });
-const rulesPatch = Joi.object({
-  name: Joi.string(),
-  email: Joi.string().email(),
-  password: Joi.string().min(8),
-  phone: Joi.number().min(11),
-  date_birth: Joi.string(),
-  gender: Joi.string().valid("man", "woman"),
-  address: Joi.string(),
-  role: Joi.string(),
-  description: Joi.string(),
+const rulesSignIn = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().required(),
 });
 
-module.exports = { rulesPatch, rulesPost };
+module.exports = { rulesSignIn, rulesRegis };
