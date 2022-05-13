@@ -12,16 +12,10 @@ const auth = require("../middlewares/auth/auth");
 Router.post(
   "/",
   auth.checkToken,
-  auth.checkUserId,
   transactionValidator.validator,
   createTransaction
 );
-Router.get("/", auth.checkToken, auth.checkUserId, readAllData);
-Router.get(
-  "/:id",
-  auth.checkToken,
-  auth.checkUserId,
-  readDetailTransactionById
-);
+Router.get("/", auth.checkToken, readAllData);
+Router.get("/:id", auth.checkToken, readDetailTransactionById);
 
 module.exports = Router;

@@ -9,7 +9,7 @@ const { readUsers, readUserById, createUser, editUserById, deleteUserById } =
 const auth = require("../middlewares/auth/auth");
 
 Router.get("/", auth.checkToken, auth.checkRole, readUsers);
-Router.get("/:id", auth.checkToken, auth.checkUserId, readUserById);
+Router.get("/profile", auth.checkToken, readUserById);
 Router.post(
   "/",
   auth.checkToken,
@@ -18,9 +18,8 @@ Router.post(
   createUser
 );
 Router.patch(
-  "/:id",
+  "/",
   auth.checkToken,
-  auth.checkRole,
   usersValidator.usersValidatorPatch.validator,
   editUserById
 );

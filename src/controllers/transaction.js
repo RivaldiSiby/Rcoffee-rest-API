@@ -3,6 +3,7 @@ const sales = require("../models/sales");
 const stock = require("../models/stock");
 const promos = require("../models/promos");
 const product = require("../models/product");
+const decode = require("../helper/docedeToken");
 const users = require("../models/users");
 const { nanoid } = require("nanoid");
 const response = require("../helper/response");
@@ -13,9 +14,12 @@ const NotFoundError = require("../exceptions/NotFoundError");
 const createTransaction = async (req, res) => {
   try {
     //   id transaction
+    const payload = await decode.decodeToken(req.header("Authorization"));
+
+    const user_id = payload.id;
     const id = `transaction-${nanoid(16)}`;
     // memasukan data sales ke table
-    const { products, coupon, user_id } = req.body;
+    const { products, coupon } = req.body;
     await users.getUserById(user_id);
     const checkPromos = await promos.getPromosByCoupon(coupon);
     const checkresult = new Promise(async (resolve, reject) => {
@@ -89,7 +93,8 @@ const createTransaction = async (req, res) => {
         await sales.postSales(item);
       });
       // memasukan data transaction
-      const result = await transaction.postTransaction(id, req.body);
+      const body = { ...req.body, user_id: user_id };
+      const result = await transaction.postTransaction(id, body);
       return response.isSuccessHaveData(
         res,
         201,

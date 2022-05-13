@@ -1,6 +1,7 @@
 const users = require("../models/users");
 const response = require("../helper/response");
 const ClientError = require("../exceptions/ClientError");
+const decode = require("../helper/docedeToken");
 
 const readUsers = async (req, res) => {
   const result = await users.getUsers();
@@ -14,7 +15,9 @@ const readUsers = async (req, res) => {
 
 const readUserById = async (req, res) => {
   try {
-    const { id } = req.params;
+    const payload = await decode.decodeToken(req.header("Authorization"));
+
+    const id = payload.id;
     const result = await users.getUserById(id);
 
     return response.isSuccessHaveData(
@@ -59,7 +62,9 @@ const createUser = async (req, res) => {
 
 const editUserById = async (req, res) => {
   try {
-    const { id } = req.params;
+    const payload = await decode.decodeToken(req.header("Authorization"));
+
+    const id = payload.id;
     let data = await users.getUserByIdAllData(id);
     // atur data patch
     data[0].name = req.body.name !== undefined ? req.body.name : data[0].name;
@@ -84,7 +89,6 @@ const editUserById = async (req, res) => {
     if (error instanceof ClientError) {
       return response.isError(res, error.statusCode, error.message);
     }
-    console.log(error);
     return response.isError(
       res,
       500,

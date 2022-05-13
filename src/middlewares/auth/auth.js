@@ -31,7 +31,8 @@ const checkToken = async (req, res, next) => {
   } catch (error) {
     if (
       error.name === "JsonWebTokenError" ||
-      error.name === "TokenExpiredError"
+      error.name === "TokenExpiredError" ||
+      error.name === "NotBeforeError"
     ) {
       return response.isError(res, 401, "Sign in needed");
     }
@@ -62,7 +63,8 @@ const checkUserId = async (req, res, next) => {
   } catch (error) {
     if (
       error.name === "JsonWebTokenError" ||
-      error.name === "TokenExpiredError"
+      error.name === "TokenExpiredError" ||
+      error.name === "NotBeforeError"
     ) {
       return response.isError(res, 401, "Sign in needed");
     }
@@ -91,7 +93,8 @@ const checkRole = async (req, res, next) => {
   } catch (error) {
     if (
       error.name === "JsonWebTokenError" ||
-      error.name === "TokenExpiredError"
+      error.name === "TokenExpiredError" ||
+      error.name === "NotBeforeError"
     ) {
       return response.isError(res, 401, "Sign in needed");
     }

@@ -17,11 +17,11 @@ exports.up = (pgm) => {
       notNull: true,
     },
     quantity: {
-      type: "VARCHAR(50)",
+      type: "INTEGER",
       notNull: true,
     },
     price: {
-      type: "VARCHAR(100)",
+      type: "INTEGER",
       notNull: true,
     },
     created_at: {
