@@ -23,10 +23,11 @@ const init = async () => {
       logger(":method :url :status :res[content-length] - :response-time ms")
     );
     // handler/middleware urlencoded
-    await server.use(express.urlencoded({ extended: false }));
+    server.use(express.urlencoded({ extended: false }));
 
     // handler/middleware raw json
-    await server.use(express.json());
+    server.use(express.text());
+    server.use(express.json());
     // router
     server.use(mainRouter);
     // start server

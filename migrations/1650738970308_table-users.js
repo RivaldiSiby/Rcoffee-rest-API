@@ -36,6 +36,10 @@ exports.up = (pgm) => {
       type: "VARCHAR(50)",
       notNull: true,
     },
+    img: {
+      type: "TEXT",
+      default: null,
+    },
     role: {
       type: "VARCHAR(255)",
       notNull: true,

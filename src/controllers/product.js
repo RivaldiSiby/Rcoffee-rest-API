@@ -2,6 +2,7 @@ const ClientError = require("../exceptions/ClientError");
 const response = require("../helper/response");
 const product = require("../models/product");
 const stock = require("../models/stock");
+const deleteFiles = require("../helper/delete");
 
 const readProducts = async (req, res) => {
   try {
@@ -55,7 +56,9 @@ const readProductById = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
-    const result = await product.postProduct(req.body);
+    const { file = null } = req;
+    const body = { ...req.body, img: file.filename };
+    const result = await product.postProduct(body);
     return response.isSuccessHaveData(
       res,
       201,
@@ -78,9 +81,12 @@ const createProduct = async (req, res) => {
 
 const editProductById = async (req, res) => {
   try {
+    const { file = null } = req;
     const { id } = req.params;
     let data = await product.getProductById(id);
     // atur data patch
+
+    data[0].img = file !== null ? file.filename : data[0].img;
     data[0].name = req.body.name !== undefined ? req.body.name : data[0].name;
     data[0].description =
       req.body.description !== undefined
@@ -90,6 +96,10 @@ const editProductById = async (req, res) => {
       req.body.category !== undefined ? req.body.category : data[0].category;
     data[0].img = req.body.img !== undefined ? req.body.img : data[0].img;
     await product.patchProduct(id, data[0]);
+    // hapus gambar
+    if (file !== null && data[0].img !== null) {
+      await deleteFiles.imgProducts(file.filename);
+    }
     return response.isSuccessNoData(res, 200, "Update Data has been success");
   } catch (error) {
     if (error instanceof ClientError) {
@@ -107,9 +117,14 @@ const editProductById = async (req, res) => {
 
 const deleteProductById = async (req, res) => {
   try {
+    const { file = null } = req;
     const { id } = req.params;
     await stock.deleteStockByProduct(id);
-    await product.deleteProductById(id);
+    const img = await product.deleteProductById(id);
+
+    if (file !== null && img !== null) {
+      await deleteFiles.imgProducts(file.filename);
+    }
     return response.isSuccessNoData(res, 200, "Delete Data has been success");
   } catch (error) {
     if (error instanceof ClientError) {

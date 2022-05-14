@@ -12,7 +12,10 @@ const {
   editProductById,
   deleteProductById,
 } = productController;
-
+const ClientError = require("../exceptions/ClientError");
+const response = require("../helper/response");
+const upload = require("../middlewares/files/upload");
+const uploadHandler = upload.imageUploadProduct.single("photo");
 // Router list
 
 Router.get("/", auth.checkToken, readProducts);
@@ -22,6 +25,24 @@ Router.post(
   auth.checkToken,
   auth.checkRole,
   productValidator.productValidatorPost.validator,
+  (req, res, next) => {
+    uploadHandler(req, res, next, (error) => {
+      if (error instanceof multer.MulterError) {
+        return response.isError(res, 400, error.message);
+      }
+      if (error instanceof ClientError) {
+        return response.isError(res, error.statusCode, error.message);
+      }
+      if (error) {
+        return response.isError(
+          res,
+          500,
+          "Sorry, there was a failure on our server"
+        );
+      }
+      next();
+    });
+  },
   createProduct
 );
 Router.patch(
@@ -29,6 +50,24 @@ Router.patch(
   auth.checkToken,
   auth.checkRole,
   productValidator.productValidatorPatch.validator,
+  (req, res, next) => {
+    uploadHandler(req, res, next, (error) => {
+      if (error instanceof multer.MulterError) {
+        return response.isError(res, 400, error.message);
+      }
+      if (error instanceof ClientError) {
+        return response.isError(res, error.statusCode, error.message);
+      }
+      if (error) {
+        return response.isError(
+          res,
+          500,
+          "Sorry, there was a failure on our server"
+        );
+      }
+      next();
+    });
+  },
   editProductById
 );
 Router.delete("/:id", auth.checkToken, auth.checkRole, deleteProductById);

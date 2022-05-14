@@ -7,7 +7,9 @@ const response = require("../helper/response");
 
 const register = async (req, res) => {
   try {
-    const result = await auth.registerUser(req.body);
+    const { file = null } = req;
+    const body = { ...req.body, img: file.filename };
+    const result = await auth.registerUser(body);
     return response.isSuccessHaveData(
       res,
       201,

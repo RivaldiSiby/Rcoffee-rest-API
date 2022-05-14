@@ -1,23 +1,13 @@
 const express = require("express");
 
 const Router = express.Router();
-const auth = require("../middlewares/auth/auth");
-const authController = require("../controllers/auth");
-const authValidator = require("../middlewares/validator/auth/index");
+const multer = require("multer");
 const ClientError = require("../exceptions/ClientError");
 const response = require("../helper/response");
 const upload = require("../middlewares/files/upload");
 const uploadHandler = upload.imageUploadUser.single("photo");
-// routes auth
 Router.post(
   "/",
-  authValidator.authValidatorSignIn.validator,
-  authController.signIn
-);
-Router.post(
-  "/register",
-  authValidator.authValidatorRegis.validator,
-  auth.checkDuplicate,
   (req, res, next) => {
     uploadHandler(req, res, next, (error) => {
       console.log(error);
@@ -35,10 +25,15 @@ Router.post(
           "Sorry, there was a failure on our server"
         );
       }
+
       next();
     });
   },
-  authController.register
+  (req, res) => {
+    const { file = null } = req;
+    console.log(file.filename);
+    res.status(200).json(file);
+  }
 );
 
 module.exports = Router;

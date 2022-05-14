@@ -22,7 +22,7 @@ exports.up = (pgm) => {
     },
     img: {
       type: "TEXT",
-      notNull: true,
+      default: null,
     },
     created_at: {
       type: "timestamp",

@@ -2,6 +2,7 @@ const users = require("../models/users");
 const response = require("../helper/response");
 const ClientError = require("../exceptions/ClientError");
 const decode = require("../helper/docedeToken");
+const deleteFiles = require("../helper/delete");
 
 const readUsers = async (req, res) => {
   const result = await users.getUsers();
@@ -40,7 +41,9 @@ const readUserById = async (req, res) => {
 
 const createUser = async (req, res) => {
   try {
-    const result = await users.postUser(req.body);
+    const { file = null } = req;
+    const body = { ...req.body, img: file.filename };
+    const result = await users.postUser(body);
     return response.isSuccessHaveData(
       res,
       201,
@@ -62,11 +65,13 @@ const createUser = async (req, res) => {
 
 const editUserById = async (req, res) => {
   try {
+    const { file = null } = req;
     const payload = await decode.decodeToken(req.header("Authorization"));
 
     const id = payload.id;
     let data = await users.getUserByIdAllData(id);
     // atur data patch
+    data[0].img = file !== null ? file.filename : data[0].img;
     data[0].name = req.body.name !== undefined ? req.body.name : data[0].name;
     data[0].email =
       req.body.email !== undefined ? req.body.email : data[0].email;
@@ -84,6 +89,10 @@ const editUserById = async (req, res) => {
       req.body.address !== undefined ? req.body.address : data[0].address;
     data[0].role = req.body.role !== undefined ? req.body.role : data[0].role;
     await users.patchUserById(id, data[0]);
+    // hapus gambar
+    if (file !== null && data[0].img !== null) {
+      await deleteFiles.imgUsers(file.filename);
+    }
     return response.isSuccessNoData(res, 200, "Update Data has been success");
   } catch (error) {
     if (error instanceof ClientError) {
@@ -99,8 +108,13 @@ const editUserById = async (req, res) => {
 
 const deleteUserById = async (req, res) => {
   try {
+    const { file = null } = req;
     const { id } = req.params;
-    await users.deleteUserById(id);
+    const img = await users.deleteUserById(id);
+    // hapus gambar
+    if (file !== null && img !== null) {
+      await deleteFiles.imgUsers(file.filename);
+    }
     return response.isSuccessNoData(res, 200, "Delete Data has been Success");
   } catch (error) {
     if (error instanceof ClientError) {

@@ -64,14 +64,23 @@ const getUserByIdAllData = async (id) => {
 const postUser = async (body) => {
   try {
     const id = `user-${nanoid(16)}`;
-    const { name, email, password, phone, date_birth, gender, address, role } =
-      body;
+    const {
+      name,
+      email,
+      password,
+      phone,
+      date_birth,
+      gender,
+      address,
+      role,
+      img,
+    } = body;
     const created_at = new Date().toISOString();
     const updated_at = created_at;
     const hashPassword = await bcrypt.hash(password, 10);
 
     const query =
-      "INSERT INTO users VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id";
+      "INSERT INTO users VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id";
     const result = await dbconect.query(query, [
       id,
       name,
@@ -84,6 +93,7 @@ const postUser = async (body) => {
       role,
       created_at,
       updated_at,
+      img,
     ]);
     if (!result.rows.length) {
       throw new InvariantError("Failed to add data");
