@@ -1,6 +1,7 @@
 require("dotenv").config();
 // express
 const express = require("express");
+const bodyParser = require("body-parser");
 
 // time zone WIB
 // process.env.TZ = "Asia/Jakarta";
@@ -30,6 +31,7 @@ const init = async () => {
     server.use(express.json());
     // router
     server.use(mainRouter);
+
     // start server
     server.listen(process.env.PORT, () => {
       console.log(`Server is Running at port ${process.env.PORT}`);

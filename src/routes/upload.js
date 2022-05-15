@@ -31,7 +31,7 @@ Router.post(
   },
   (req, res) => {
     const { file = null } = req;
-    console.log(file.filename);
+    console.log(file.filename, req.body);
     res.status(200).json(file);
   }
 );

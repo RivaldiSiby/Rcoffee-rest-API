@@ -8,7 +8,9 @@ const response = require("../helper/response");
 const register = async (req, res) => {
   try {
     const { file = null } = req;
-    const body = { ...req.body, img: file.filename };
+    const filename = file !== null ? file.path : null;
+    console.log(file);
+    const body = { ...req.body, img: filename };
     const result = await auth.registerUser(body);
     return response.isSuccessHaveData(
       res,
@@ -17,6 +19,7 @@ const register = async (req, res) => {
       "Register Success"
     );
   } catch (error) {
+    console.log(error);
     if (error instanceof ClientError) {
       return response.isError(res, error.statusCode, error.message);
     }

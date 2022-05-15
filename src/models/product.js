@@ -181,12 +181,12 @@ const patchProduct = async (id, body) => {
 
 const deleteProductById = async (id) => {
   try {
-    const query = "DELETE FROM product WHERE id = $1 RETURNING id";
+    const query = "DELETE FROM product WHERE id = $1 RETURNING img";
     const result = await dbconect.query(query, [id]);
     if (!result.rows.length) {
       throw new NotFoundError("failed to delete data. Data not found");
     }
-    return result.rows[0].id;
+    return result.rows[0].img;
   } catch (error) {
     if (error instanceof NotFoundError) {
       throw new NotFoundError(error.message);

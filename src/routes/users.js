@@ -17,7 +17,6 @@ Router.post(
   "/",
   auth.checkToken,
   auth.checkRole,
-  usersValidator.usersValidatorPost.validator,
   (req, res, next) => {
     uploadHandler(req, res, next, (error) => {
       console.log(error);
@@ -38,12 +37,12 @@ Router.post(
       next();
     });
   },
+  usersValidator.usersValidatorPost.validator,
   createUser
 );
 Router.patch(
   "/",
   auth.checkToken,
-  usersValidator.usersValidatorPatch.validator,
   (req, res, next) => {
     uploadHandler(req, res, next, (error) => {
       console.log(error);
@@ -64,6 +63,8 @@ Router.patch(
       next();
     });
   },
+
+  usersValidator.usersValidatorPatch.validator,
   editUserById
 );
 Router.delete("/:id", auth.checkToken, auth.checkRole, deleteUserById);

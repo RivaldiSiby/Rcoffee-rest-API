@@ -24,7 +24,7 @@ Router.post(
   "/",
   auth.checkToken,
   auth.checkRole,
-  productValidator.productValidatorPost.validator,
+
   (req, res, next) => {
     uploadHandler(req, res, next, (error) => {
       if (error instanceof multer.MulterError) {
@@ -43,13 +43,14 @@ Router.post(
       next();
     });
   },
+  productValidator.productValidatorPost.validator,
   createProduct
 );
 Router.patch(
   "/:id",
   auth.checkToken,
   auth.checkRole,
-  productValidator.productValidatorPatch.validator,
+
   (req, res, next) => {
     uploadHandler(req, res, next, (error) => {
       if (error instanceof multer.MulterError) {
@@ -68,6 +69,7 @@ Router.patch(
       next();
     });
   },
+  productValidator.productValidatorPatch.validator,
   editProductById
 );
 Router.delete("/:id", auth.checkToken, auth.checkRole, deleteProductById);

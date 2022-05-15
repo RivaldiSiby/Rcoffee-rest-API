@@ -26,7 +26,7 @@ const getUsers = async () => {
 const getUserById = async (id) => {
   try {
     const query =
-      "SELECT id,name,email,phone,date_birth,gender,address FROM users WHERE id = $1 ";
+      "SELECT id,name,email,phone,date_birth,gender,address,img FROM users WHERE id = $1 ";
     const result = await dbconect.query(query, [id]);
     if (!result.rows.length) {
       throw new NotFoundError("User Data By Id is not Found");
@@ -112,13 +112,22 @@ const postUser = async (body) => {
 
 const patchUserById = async (id, body) => {
   try {
-    const { name, email, password, phone, date_birth, gender, address, role } =
-      body;
+    const {
+      name,
+      email,
+      password,
+      phone,
+      date_birth,
+      gender,
+      address,
+      role,
+      img,
+    } = body;
     const hashPassword =
       password.length >= 60 ? password : await bcrypt.hash(password, 10);
     const updated_at = new Date().toISOString();
     const query =
-      "UPDATE users SET name=$1, email=$2, password=$3, phone=$4, date_birth=$5, gender=$6, address=$7, role=$8, updated_at=$9 WHERE id=$10 RETURNING id";
+      "UPDATE users SET name=$1, email=$2, password=$3, phone=$4, date_birth=$5, gender=$6, address=$7, role=$8, updated_at=$9,img=$10 WHERE id=$11 RETURNING id";
     const result = await dbconect.query(query, [
       name,
       email,
@@ -129,6 +138,7 @@ const patchUserById = async (id, body) => {
       address,
       role,
       updated_at,
+      img,
       id,
     ]);
     if (!result.rows.length) {

@@ -16,7 +16,6 @@ Router.post(
 );
 Router.post(
   "/register",
-  authValidator.authValidatorRegis.validator,
   auth.checkDuplicate,
   (req, res, next) => {
     uploadHandler(req, res, next, (error) => {
@@ -38,6 +37,7 @@ Router.post(
       next();
     });
   },
+  authValidator.authValidatorRegis.validator,
   authController.register
 );
 

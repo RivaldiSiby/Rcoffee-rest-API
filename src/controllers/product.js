@@ -57,7 +57,8 @@ const readProductById = async (req, res) => {
 const createProduct = async (req, res) => {
   try {
     const { file = null } = req;
-    const body = { ...req.body, img: file.filename };
+    const filename = file !== null ? file.path : null;
+    const body = { ...req.body, img: filename };
     const result = await product.postProduct(body);
     return response.isSuccessHaveData(
       res,
@@ -85,8 +86,11 @@ const editProductById = async (req, res) => {
     const { id } = req.params;
     let data = await product.getProductById(id);
     // atur data patch
-
-    data[0].img = file !== null ? file.filename : data[0].img;
+    // hapus gambar
+    if (file !== null && data[0].img !== null) {
+      await deleteFiles.imgFiles(data[0].img);
+    }
+    data[0].img = file !== null ? file.path : data[0].img;
     data[0].name = req.body.name !== undefined ? req.body.name : data[0].name;
     data[0].description =
       req.body.description !== undefined
@@ -96,10 +100,7 @@ const editProductById = async (req, res) => {
       req.body.category !== undefined ? req.body.category : data[0].category;
     data[0].img = req.body.img !== undefined ? req.body.img : data[0].img;
     await product.patchProduct(id, data[0]);
-    // hapus gambar
-    if (file !== null && data[0].img !== null) {
-      await deleteFiles.imgProducts(file.filename);
-    }
+
     return response.isSuccessNoData(res, 200, "Update Data has been success");
   } catch (error) {
     if (error instanceof ClientError) {
@@ -117,13 +118,12 @@ const editProductById = async (req, res) => {
 
 const deleteProductById = async (req, res) => {
   try {
-    const { file = null } = req;
     const { id } = req.params;
     await stock.deleteStockByProduct(id);
     const img = await product.deleteProductById(id);
-
-    if (file !== null && img !== null) {
-      await deleteFiles.imgProducts(file.filename);
+    console.log(img);
+    if (img !== null) {
+      await deleteFiles.imgFiles(img);
     }
     return response.isSuccessNoData(res, 200, "Delete Data has been success");
   } catch (error) {
