@@ -6,11 +6,45 @@ const deleteFiles = require("../helper/delete");
 
 const readProducts = async (req, res) => {
   try {
-    const result = await product.getProducts(req);
-    return response.isSuccessHaveData(
+    req.query.page = req.query.page === undefined ? 1 : req.query.page;
+    const result = await product.getProducts(req.query);
+
+    // pagination
+    const { totalData, totalPage, data } = result;
+
+    const nextPage = parseInt(req.query.page) + 1;
+    const prevPage = parseInt(req.query.page) - 1;
+    // path query
+    let queryPath = "";
+    queryPath += req.query.sort !== undefined ? `sort=${req.query.sort}&` : "";
+    queryPath +=
+      req.query.order !== undefined ? `order=${req.query.order}&` : "";
+    queryPath +=
+      req.query.category !== undefined ? `category=${req.query.category}&` : "";
+    queryPath += req.query.name !== undefined ? `name=${req.query.name}&` : "";
+    queryPath +=
+      req.query.limit !== undefined ? `limit=${req.query.limit}&` : "";
+    // path query
+    let next =
+      nextPage > totalPage
+        ? {}
+        : { next: `/product?${queryPath}page=${nextPage}` };
+    let prev =
+      req.query.page <= 1
+        ? {}
+        : { prev: `/product?${queryPath}page=${prevPage}` };
+    const meta = {
+      totalData: totalData,
+      totalPage: totalPage,
+      page: req.query.page,
+      ...next,
+      ...prev,
+    };
+    return response.isSuccessHaveAllData(
       res,
       200,
-      result,
+      data,
+      meta,
       "Read Data has been success"
     );
   } catch (error) {
@@ -121,7 +155,6 @@ const deleteProductById = async (req, res) => {
     const { id } = req.params;
     await stock.deleteStockByProduct(id);
     const img = await product.deleteProductById(id);
-    console.log(img);
     if (img !== null) {
       await deleteFiles.imgFiles(img);
     }

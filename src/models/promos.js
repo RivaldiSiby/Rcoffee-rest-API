@@ -4,11 +4,21 @@ const ClientError = require("../exceptions/ClientError");
 const InvariantError = require("../exceptions/InvariantError");
 const NotFoundError = require("../exceptions/NotFoundError");
 const dbconect = new Pool();
-const getPromosAll = async () => {
+const getPromosAll = async (query) => {
   try {
-    const query = "SELECT * FROM promos";
-    const result = await dbconect.query(query);
-    return result;
+    // pagination
+    const { page = 1, limit = 3 } = query;
+    const offset = parseInt(page - 1) * Number(limit);
+    const querySql = "SELECT * FROM promos LIMIT $1 OFFSET $2";
+    const result = await dbconect.query(querySql, [limit, offset]);
+    const data = {
+      data: result.rows,
+    };
+    // data pagination
+    const count = await dbconect.query("SELECT COUNT(*) AS total FROM promos");
+    data.totalData = parseInt(count.rows[0]["total"]);
+    data.totalPage = Math.ceil(data.totalData / parseInt(limit));
+    return data;
   } catch (error) {
     if (error instanceof NotFoundError) {
       throw new NotFoundError(error.message);

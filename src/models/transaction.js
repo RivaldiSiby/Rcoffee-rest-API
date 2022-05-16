@@ -36,17 +36,25 @@ const postTransaction = async (id, body) => {
   }
 };
 
-const getTransactions = async (id = null) => {
+const getTransactions = async (id = null, queryData) => {
   try {
     if (id === null) {
-      const query =
-        "SELECT t.id, t.user_id, t.coupon, t.delivery_cost, t.tax, t.created_at, t.updated_at, SUM(s.total) AS Item_Total,SUM(s.quantity) AS quantity_items FROM transaction t INNER JOIN sales s on t.id = s.transaction_id GROUP BY t.id";
+      const { page = 1, limit = 3 } = queryData;
+      const offset = parseInt(page - 1) * Number(limit);
+      const querySql =
+        "SELECT t.id, t.user_id, t.coupon, t.delivery_cost, t.tax, t.created_at, t.updated_at, SUM(s.total) AS Item_Total,SUM(s.quantity) AS quantity_items FROM transaction t INNER JOIN sales s on t.id = s.transaction_id GROUP BY t.id LIMIT $1 OFFSET $2";
 
-      const result = await dbconect.query(query);
-      if (!result.rows.length) {
-        throw new NotFoundError("Data Not Found");
-      }
-      return result.rows;
+      const result = await dbconect.query(querySql, [limit, offset]);
+      const data = {
+        data: result.rows,
+      };
+      // data pagination
+      const count = await dbconect.query(
+        "SELECT COUNT(*) AS total FROM transaction"
+      );
+      data.totalData = parseInt(count.rows[0]["total"]);
+      data.totalPage = Math.ceil(data.totalData / parseInt(limit));
+      return data;
     }
 
     const query = "SELECT * FROM transaction WHERE id = $1";

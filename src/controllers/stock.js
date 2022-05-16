@@ -5,12 +5,38 @@ const product = require("../models/product");
 
 const readStocks = async (req, res) => {
   try {
-    const result = await stock.getStocksAll();
-    return response.isSuccessHaveData(
+    req.query.page = req.query.page === undefined ? 1 : req.query.page;
+    const result = await stock.getStocksAll(req.query);
+    const { totalData, totalPage, data } = result;
+
+    const nextPage = parseInt(req.query.page) + 1;
+    const prevPage = parseInt(req.query.page) - 1;
+    // path query
+    let queryPath = "";
+    queryPath +=
+      req.query.limit !== undefined ? `limit=${req.query.limit}&` : "";
+    // path query
+    let next =
+      nextPage > totalPage
+        ? {}
+        : { next: `/stock?${queryPath}page=${nextPage}` };
+    let prev =
+      req.query.page <= 1
+        ? {}
+        : { prev: `/stock?${queryPath}page=${prevPage}` };
+    const meta = {
+      totalData: totalData,
+      totalPage: totalPage,
+      page: req.query.page,
+      ...next,
+      ...prev,
+    };
+    return response.isSuccessHaveAllData(
       res,
       200,
-      result.rows,
-      "Read All Data has been success"
+      data,
+      meta,
+      "Read Data has been success"
     );
   } catch (error) {
     if (error instanceof ClientError) {

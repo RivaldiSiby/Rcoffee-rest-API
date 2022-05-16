@@ -7,6 +7,14 @@ response.isSuccessHaveData = (res, status, data, msg) => {
     data,
   });
 };
+response.isSuccessHaveAllData = (res, status, data, meta, msg) => {
+  return res.status(status).json({
+    status: "success",
+    message: msg,
+    data,
+    meta,
+  });
+};
 response.isSuccessNoData = (res, status, msg) => {
   return res.status(status).json({
     status: "success",

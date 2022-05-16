@@ -165,22 +165,47 @@ const readDetailTransactionById = async (req, res) => {
 
 const readAllData = async (req, res) => {
   try {
-    const result = await transaction.getTransactions();
+    req.query.page = req.query.page === undefined ? 1 : req.query.page;
+    const result = await transaction.getTransactions(null, req.query);
 
-    let data = [];
-    result.map((item) => {
+    const { totalData, totalPage, data } = result;
+    let datatrans = [];
+    data.map((item) => {
       const total =
         parseFloat(item.tax) * parseInt(item.item_total) +
         parseInt(item.item_total) +
         parseInt(item.delivery_cost);
       item = { ...item, total: total };
-      data.push(item);
+      datatrans.push(item);
     });
-    return response.isSuccessHaveData(
+    const nextPage = parseInt(req.query.page) + 1;
+    const prevPage = parseInt(req.query.page) - 1;
+    // path query
+    let queryPath = "";
+    queryPath +=
+      req.query.limit !== undefined ? `limit=${req.query.limit}&` : "";
+    // path query
+    let next =
+      nextPage > totalPage
+        ? {}
+        : { next: `/transaction?${queryPath}page=${nextPage}` };
+    let prev =
+      req.query.page <= 1
+        ? {}
+        : { prev: `/transaction?${queryPath}page=${prevPage}` };
+    const meta = {
+      totalData: totalData,
+      totalPage: totalPage,
+      page: req.query.page,
+      ...next,
+      ...prev,
+    };
+    return response.isSuccessHaveAllData(
       res,
       200,
-      data,
-      "Read All Data Transaction has been success"
+      datatrans,
+      meta,
+      "Read Data has been success"
     );
   } catch (error) {
     if (error instanceof ClientError) {

@@ -5,11 +5,37 @@ const product = require("../models/product");
 
 const readPromosAll = async (req, res) => {
   try {
-    const result = await promos.getPromosAll();
-    return response.isSuccessHaveData(
+    req.query.page = req.query.page === undefined ? 1 : req.query.page;
+    const result = await promos.getPromosAll(req.query);
+    const { totalData, totalPage, data } = result;
+
+    const nextPage = parseInt(req.query.page) + 1;
+    const prevPage = parseInt(req.query.page) - 1;
+    // path query
+    let queryPath = "";
+    queryPath +=
+      req.query.limit !== undefined ? `limit=${req.query.limit}&` : "";
+    // path query
+    let next =
+      nextPage > totalPage
+        ? {}
+        : { next: `/promos?${queryPath}page=${nextPage}` };
+    let prev =
+      req.query.page <= 1
+        ? {}
+        : { prev: `/promos?${queryPath}page=${prevPage}` };
+    const meta = {
+      totalData: totalData,
+      totalPage: totalPage,
+      page: req.query.page,
+      ...next,
+      ...prev,
+    };
+    return response.isSuccessHaveAllData(
       res,
       200,
-      result.rows,
+      data,
+      meta,
       "Read Data has been success"
     );
   } catch (error) {

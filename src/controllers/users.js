@@ -5,11 +5,32 @@ const decode = require("../helper/docedeToken");
 const deleteFiles = require("../helper/delete");
 
 const readUsers = async (req, res) => {
-  const result = await users.getUsers();
-  return response.isSuccessHaveData(
+  req.query.page = req.query.page === undefined ? 1 : req.query.page;
+  const result = await users.getUsers(req.query);
+  const { totalData, totalPage, data } = result;
+
+  const nextPage = parseInt(req.query.page) + 1;
+  const prevPage = parseInt(req.query.page) - 1;
+  // path query
+  let queryPath = "";
+  queryPath += req.query.limit !== undefined ? `limit=${req.query.limit}&` : "";
+  // path query
+  let next =
+    nextPage > totalPage ? {} : { next: `/users?${queryPath}page=${nextPage}` };
+  let prev =
+    req.query.page <= 1 ? {} : { prev: `/users?${queryPath}page=${prevPage}` };
+  const meta = {
+    totalData: totalData,
+    totalPage: totalPage,
+    page: req.query.page,
+    ...next,
+    ...prev,
+  };
+  return response.isSuccessHaveAllData(
     res,
     200,
-    result.rows,
+    data,
+    meta,
     "Read Data has been success"
   );
 };

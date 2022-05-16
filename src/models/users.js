@@ -6,12 +6,22 @@ const NotFoundError = require("../exceptions/NotFoundError");
 const ClientError = require("../exceptions/ClientError");
 const dbconect = new Pool();
 
-const getUsers = async () => {
+const getUsers = async (query) => {
   try {
-    const query =
-      "SELECT id,name,email,phone,date_birth,gender,address FROM users";
-    const result = await dbconect.query(query);
-    return result;
+    // pagination
+    const { page = 1, limit = 3 } = query;
+    const offset = parseInt(page - 1) * Number(limit);
+    const querySql =
+      "SELECT id,name,email,phone,date_birth,gender,address FROM users LIMIT $1 OFFSET $2";
+    const result = await dbconect.query(querySql, [limit, offset]);
+    const data = {
+      data: result.rows,
+    };
+    // data pagination
+    const count = await dbconect.query("SELECT COUNT(*) AS total FROM users");
+    data.totalData = parseInt(count.rows[0]["total"]);
+    data.totalPage = Math.ceil(data.totalData / parseInt(limit));
+    return data;
   } catch (error) {
     if (error instanceof NotFoundError) {
       throw new NotFoundError(error.message);
