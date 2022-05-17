@@ -30,7 +30,6 @@ const limit = {
 
 const imageOnlyFilter = (req, file, cb) => {
   const extName = path.extname(file.originalname).toLowerCase();
-
   const allowedExt = /jpg|png/;
   if (!allowedExt.test(extName)) {
     return cb(

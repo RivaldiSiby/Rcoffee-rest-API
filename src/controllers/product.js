@@ -3,6 +3,7 @@ const response = require("../helper/response");
 const product = require("../models/product");
 const stock = require("../models/stock");
 const deleteFiles = require("../helper/delete");
+const InvariantError = require("../exceptions/InvariantError");
 
 const readProducts = async (req, res) => {
   try {
@@ -91,6 +92,9 @@ const readProductById = async (req, res) => {
 const createProduct = async (req, res) => {
   try {
     const { file = null } = req;
+    if (file === null) {
+      throw new InvariantError("Photo is required");
+    }
     const filename = file !== null ? file.path : null;
     const body = { ...req.body, img: filename };
     const result = await product.postProduct(body);

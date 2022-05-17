@@ -3,6 +3,7 @@ const response = require("../helper/response");
 const ClientError = require("../exceptions/ClientError");
 const decode = require("../helper/docedeToken");
 const deleteFiles = require("../helper/delete");
+const InvariantError = require("../exceptions/InvariantError");
 
 const readUsers = async (req, res) => {
   req.query.page = req.query.page === undefined ? 1 : req.query.page;
@@ -63,6 +64,9 @@ const readUserById = async (req, res) => {
 const createUser = async (req, res) => {
   try {
     const { file = null } = req;
+    if (file === null) {
+      throw new InvariantError("Photo is required");
+    }
     const filename = file !== null ? file.path : null;
     const body = { ...req.body, img: filename };
     const result = await users.postUser(body);

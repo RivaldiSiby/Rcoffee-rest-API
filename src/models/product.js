@@ -84,6 +84,11 @@ const getProducts = async (query) => {
     if (!result.rows.length) {
       throw new NotFoundError(`Data is Not Found`);
     }
+
+    result.rows.map((item) => {
+      path = item.img.split("\\");
+      item.img = `/${path[1]}/${path[2]}/${path[3]}`;
+    });
     const data = {
       data: result.rows,
     };
@@ -111,7 +116,9 @@ const getProductById = async (id) => {
     if (!result.rows.length) {
       throw new NotFoundError("Product Data By Id is Not Found");
     }
-    return result.rows;
+    path = result.rows[0].img.split("\\");
+    result.rows[0].img = `/${path[1]}/${path[2]}/${path[3]}`;
+    return result.rows[0];
   } catch (error) {
     if (error instanceof NotFoundError) {
       throw new NotFoundError(error.message);

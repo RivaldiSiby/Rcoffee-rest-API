@@ -20,20 +20,21 @@ const init = async () => {
     // database check
     console.log("Database Conected");
     // middleware
-    server.use(
+    await server.use(
       logger(":method :url :status :res[content-length] - :response-time ms")
     );
+    await server.use(express.static("public"));
     // handler/middleware urlencoded
-    server.use(express.urlencoded({ extended: false }));
+    await server.use(express.urlencoded({ extended: false }));
 
     // handler/middleware raw json
-    server.use(express.text());
-    server.use(express.json());
+    await server.use(express.text());
+    await server.use(express.json());
     // router
-    server.use(mainRouter);
+    await server.use(mainRouter);
 
     // start server
-    server.listen(process.env.PORT, () => {
+    await server.listen(process.env.PORT, () => {
       console.log(`Server is Running at port ${process.env.PORT}`);
     });
   } catch (error) {

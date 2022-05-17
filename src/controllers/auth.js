@@ -8,8 +8,10 @@ const response = require("../helper/response");
 const register = async (req, res) => {
   try {
     const { file = null } = req;
+    if (file === null) {
+      throw new InvariantError("Photo is required");
+    }
     const filename = file !== null ? file.path : null;
-    console.log(file);
     const body = { ...req.body, img: filename };
     const result = await auth.registerUser(body);
     return response.isSuccessHaveData(
@@ -38,7 +40,7 @@ const signIn = async (req, res) => {
     const cekpass = await bcrypt.compare(password, datauser.password);
 
     if (!cekpass) {
-      throw new InvariantError("Password is Wrong");
+      throw new InvariantError("Email is not registered Or Password is Wrong");
     }
     // generate jwt
     const payload = {

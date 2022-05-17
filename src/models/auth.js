@@ -59,7 +59,7 @@ const verifyUserByEmail = async (email) => {
     const query = "SELECT id,email,password,role FROM users WHERE email = $1";
     const result = await dbconect.query(query, [email]);
     if (!result.rows.length) {
-      throw new InvariantError("Email is not registered");
+      throw new InvariantError("Email is not registered Or Password is Wrong");
     }
     return result.rows[0];
   } catch (error) {

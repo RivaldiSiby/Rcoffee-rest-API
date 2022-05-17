@@ -12,8 +12,13 @@ const getUsers = async (query) => {
     const { page = 1, limit = 3 } = query;
     const offset = parseInt(page - 1) * Number(limit);
     const querySql =
-      "SELECT id,name,email,phone,date_birth,gender,address FROM users LIMIT $1 OFFSET $2";
+      "SELECT id,name,email,phone,date_birth,gender,address,img FROM users LIMIT $1 OFFSET $2";
     const result = await dbconect.query(querySql, [limit, offset]);
+
+    result.rows.map((item) => {
+      path = item.img.split("\\");
+      item.img = `/${path[1]}/${path[2]}/${path[3]}`;
+    });
     const data = {
       data: result.rows,
     };
@@ -41,7 +46,10 @@ const getUserById = async (id) => {
     if (!result.rows.length) {
       throw new NotFoundError("User Data By Id is not Found");
     }
-    return result.rows;
+    // generate img link
+    path = result.rows[0].img.split("\\");
+    result.rows[0].img = `/${path[1]}/${path[2]}/${path[3]}`;
+    return result.rows[0];
   } catch (error) {
     if (error instanceof NotFoundError) {
       throw new NotFoundError(error.message);
