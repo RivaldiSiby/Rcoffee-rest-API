@@ -1,6 +1,7 @@
 const multer = require("multer");
 const path = require("path");
 const InvariantError = require("../../exceptions/InvariantError");
+const NotFoundError = require("../../exceptions/NotFoundError");
 
 const imgstorageUser = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -31,11 +32,13 @@ const imageOnlyFilter = (req, file, cb) => {
   const extName = path.extname(file.originalname).toLowerCase();
 
   const allowedExt = /jpg|png/;
-  if (!allowedExt.test(extName))
+  if (!allowedExt.test(extName)) {
     return cb(
-      new InvariantError("Only Use Allowed Extension (JPG, PNG)"),
+      new NotFoundError("Only Use Allowed Extension (JPG, PNG)"),
       false
     );
+  }
+
   cb(null, true);
 };
 
@@ -49,6 +52,7 @@ const imageUploadProduct = multer({
   limits: limit,
   fileFilter: imageOnlyFilter,
 });
+
 module.exports = {
   imageUploadProduct,
   imageUploadUser,

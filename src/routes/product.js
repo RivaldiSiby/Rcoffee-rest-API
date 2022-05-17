@@ -1,7 +1,6 @@
 const express = require("express");
 
 const Router = express.Router();
-
 const productController = require("../controllers/product");
 const productValidator = require("../middlewares/validator/product/index");
 const auth = require("../middlewares/auth/auth");
@@ -15,6 +14,7 @@ const {
 const ClientError = require("../exceptions/ClientError");
 const response = require("../helper/response");
 const upload = require("../middlewares/files/upload");
+const multer = require("multer");
 const uploadHandler = upload.imageUploadProduct.single("photo");
 // Router list
 
@@ -24,22 +24,26 @@ Router.post(
   "/",
   auth.checkToken,
   auth.checkRole,
+  function (req, res, next) {
+    uploadHandler(req, res, function (err) {
+      if (err) {
+        console.log(err.message);
+        if (err instanceof multer.MulterError) {
+          // A Multer error occurred when uploading.
+          return response.isError(res, 400, err.message);
+        }
+        if (err instanceof ClientError) {
+          return response.isError(res, err.statusCode, err.message);
+        }
+        if (err) {
+          return response.isError(
+            res,
+            500,
+            "Sorry, there was a failure on our server"
+          );
+        }
+      }
 
-  (req, res, next) => {
-    uploadHandler(req, res, next, (error) => {
-      if (error instanceof multer.MulterError) {
-        return response.isError(res, 400, error.message);
-      }
-      if (error instanceof ClientError) {
-        return response.isError(res, error.statusCode, error.message);
-      }
-      if (error) {
-        return response.isError(
-          res,
-          500,
-          "Sorry, there was a failure on our server"
-        );
-      }
       next();
     });
   },
@@ -51,21 +55,26 @@ Router.patch(
   auth.checkToken,
   auth.checkRole,
 
-  (req, res, next) => {
-    uploadHandler(req, res, next, (error) => {
-      if (error instanceof multer.MulterError) {
-        return response.isError(res, 400, error.message);
+  function (req, res, next) {
+    uploadHandler(req, res, function (err) {
+      if (err) {
+        console.log(err.message);
+        if (err instanceof multer.MulterError) {
+          // A Multer error occurred when uploading.
+          return response.isError(res, 400, err.message);
+        }
+        if (err instanceof ClientError) {
+          return response.isError(res, err.statusCode, err.message);
+        }
+        if (err) {
+          return response.isError(
+            res,
+            500,
+            "Sorry, there was a failure on our server"
+          );
+        }
       }
-      if (error instanceof ClientError) {
-        return response.isError(res, error.statusCode, error.message);
-      }
-      if (error) {
-        return response.isError(
-          res,
-          500,
-          "Sorry, there was a failure on our server"
-        );
-      }
+
       next();
     });
   },
