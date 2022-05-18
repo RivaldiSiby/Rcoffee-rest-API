@@ -12,7 +12,7 @@ const getUsers = async (query) => {
     const { page = 1, limit = 3 } = query;
     const offset = parseInt(page - 1) * Number(limit);
     const querySql =
-      "SELECT id,name,email,phone,date_birth,gender,address,img FROM users LIMIT $1 OFFSET $2";
+      "SELECT u.id,u.name,u.email,u.phone,u.date_birth,u.gender,u.address,u.img,r.name as role FROM users u INNER JOIN role r ON u.role = r.id LIMIT $1 OFFSET $2";
     const result = await dbconect.query(querySql, [limit, offset]);
 
     result.rows.map((item) => {

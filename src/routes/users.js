@@ -5,18 +5,19 @@ const usersValidator = require("../middlewares/validator/users/index");
 const { readUsers, readUserById, createUser, editUserById, deleteUserById } =
   usersController;
 const auth = require("../middlewares/auth/auth");
+const owner = require("../middlewares/auth/owner");
 const ClientError = require("../exceptions/ClientError");
 const response = require("../helper/response");
 const upload = require("../middlewares/files/upload");
 const multer = require("multer");
 const uploadHandler = upload.imageUploadUser.single("photo");
 
+// router users
 Router.get("/", auth.checkToken, auth.checkRole, readUsers);
 Router.get("/profile", auth.checkToken, readUserById);
 Router.post(
   "/",
-  auth.checkToken,
-  auth.checkRole,
+  owner.checkOwnerCode,
   function (req, res, next) {
     uploadHandler(req, res, function (err) {
       if (err) {
