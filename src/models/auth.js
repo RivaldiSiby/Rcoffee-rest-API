@@ -62,7 +62,6 @@ const verifyUserByEmail = async (email) => {
     if (!result.rows.length) {
       throw new InvariantError("Email is not registered Or Password is Wrong");
     }
-    console.log(result.rows[0]);
     return result.rows[0];
   } catch (error) {
     if (error instanceof NotFoundError) {

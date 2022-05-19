@@ -6,29 +6,20 @@ const InvariantError = require("../exceptions/InvariantError");
 const NotFoundError = require("../exceptions/NotFoundError");
 const dbconect = new Pool();
 
-const getProducts = async (query) => {
+const getFavoriteProducts = async (query) => {
   try {
     const byCategory = Object.keys(query).find((item) => item === "category");
     const byName = Object.keys(query).find((item) => item === "name");
-    const bySort = Object.keys(query).find((item) => item === "sort");
-    const byOrder = Object.keys(query).find((item) => item === "order");
 
     let querySQL = {
-      text: "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p LEFT JOIN stock s ON p.id  = s.product_id ",
+      text: "select p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price, SUM(ss.quantity)as penjualan FROM sales ss LEFT JOIN stock s ON ss.stock_id = s.id LEFT JOIN product p ON s.product_id = p.id GROUP BY p.id,s.id ORDER BY penjualan desc",
       values: [],
     };
-    let queryCount = {
-      text: "SELECT COUNT(*) AS total FROM product",
-      values: [],
-    };
+
     // ketika difilter dengan nama dan catagory
     if (byName !== undefined && byCategory !== undefined) {
       querySQL = {
-        text: "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p LEFT JOIN stock s ON p.id  = s.product_id WHERE lower(name) LIKE lower('%' || $1 || '%') AND lower(category) LIKE lower('%' || $2 || '%') ",
-        values: [query.name, query.category],
-      };
-      queryCount = {
-        text: "SELECT COUNT(*) AS total FROM product WHERE lower(name) LIKE lower('%' || $1 || '%') AND lower(category) LIKE lower('%' || $2 || '%') ",
+        text: "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price, SUM(ss.quantity)as penjualan FROM sales ss LEFT JOIN stock s ON ss.stock_id = s.id LEFT JOIN product p ON s.product_id = p.id WHERE lower(name) LIKE lower('%' || $1 || '%') AND lower(category) LIKE lower('%' || $2 || '%') GROUP BY p.id,s.id ORDER BY penjualan desc",
         values: [query.name, query.category],
       };
     }
@@ -39,40 +30,17 @@ const getProducts = async (query) => {
       if (filterkey === "name") {
         // pengecekan order by desc / asc
         querySQL = {
-          text: "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p LEFT JOIN stock s ON p.id  = s.product_id WHERE lower(name) LIKE lower('%' || $1 || '%')",
-          values: [filtervalue],
-        };
-        queryCount = {
-          text: "SELECT COUNT(*) AS total FROM product WHERE lower(name) LIKE lower('%' || $1 || '%')",
+          text: "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price, SUM(ss.quantity)as penjualan FROM sales ss LEFT JOIN stock s ON ss.stock_id = s.id LEFT JOIN product p ON s.product_id = p.id WHERE lower(name) LIKE lower('%' || $1 || '%') GROUP BY p.id,s.id ORDER BY penjualan desc",
           values: [filtervalue],
         };
       } else {
         querySQL = {
-          text: "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p LEFT JOIN stock s ON p.id  = s.product_id WHERE lower(category) LIKE lower('%' || $1 || '%')",
-          values: [filtervalue],
-        };
-        queryCount = {
-          text: "SELECT COUNT(*) AS total FROM product WHERE lower(category) LIKE lower('%' || $1 || '%')",
+          text: "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price, SUM(ss.quantity)as penjualan FROM sales ss LEFT JOIN stock s ON ss.stock_id = s.id LEFT JOIN product p ON s.product_id = p.id WHERE lower(category) LIKE lower('%' || $1 || '%') GROUP BY p.id,s.id ORDER BY penjualan desc",
           values: [filtervalue],
         };
       }
     }
-
-    // mengambil data sort dan order
-    let sort = "id";
-    let order = "ASC";
-    if (bySort !== undefined && byOrder !== undefined) {
-      // cek isi query sortir
-      if (query.sort !== "time" && query.sort !== "price") {
-        throw new InvariantError("Value Sort is not valid");
-      }
-      sort = query.sort === "time" ? "created_at" : sort;
-      sort = query.sort === "price" ? "price" : sort;
-      order = query.order === "desc" ? "DESC" : "ASC";
-
-      querySQL.text += " ORDER BY " + sort + " " + order;
-    }
-
+    const resultCount = await dbconect.query(querySQL);
     // pagination
     const { page = 1, limit = 3 } = query;
     const offset = parseInt(page - 1) * Number(limit);
@@ -92,9 +60,95 @@ const getProducts = async (query) => {
     const data = {
       data: result.rows,
     };
+
     // data pagination
-    const count = await dbconect.query(queryCount);
-    data.totalData = parseInt(count.rows[0]["total"]);
+    data.totalData = parseInt(resultCount.rowCount);
+    data.totalPage = Math.ceil(data.totalData / parseInt(limit));
+    return data;
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
+    throw new Error(error.message);
+  }
+};
+const getProducts = async (query) => {
+  try {
+    const byCategory = Object.keys(query).find((item) => item === "category");
+    const byName = Object.keys(query).find((item) => item === "name");
+    const bySort = Object.keys(query).find((item) => item === "sort");
+    const byOrder = Object.keys(query).find((item) => item === "order");
+
+    let querySQL = {
+      text: "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM sales ss LEFT JOIN stock s ON ss.stock_id = s.id LEFT JOIN product p ON s.product_id = p.id ",
+      values: [],
+    };
+
+    // ketika difilter dengan nama dan catagory
+    if (byName !== undefined && byCategory !== undefined) {
+      querySQL = {
+        text: "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM sales ss LEFT JOIN stock s ON ss.stock_id = s.id LEFT JOIN product p ON s.product_id = p.id WHERE lower(name) LIKE lower('%' || $1 || '%') AND lower(category) LIKE lower('%' || $2 || '%') ",
+        values: [query.name, query.category],
+      };
+    }
+    // ketika difilter dengan nama  atau catagory
+    if (byName !== undefined || byCategory !== undefined) {
+      let filterkey = byName !== undefined ? "name" : "category";
+      let filtervalue = query.name !== undefined ? query.name : query.category;
+      if (filterkey === "name") {
+        // pengecekan order by desc / asc
+        querySQL = {
+          text: "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM sales ss LEFT JOIN stock s ON ss.stock_id = s.id LEFT JOIN product p ON s.product_id = p.id WHERE lower(name) LIKE lower('%' || $1 || '%')",
+          values: [filtervalue],
+        };
+      } else {
+        querySQL = {
+          text: "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM sales ss LEFT JOIN stock s ON ss.stock_id = s.id LEFT JOIN product p ON s.product_id = p.id WHERE lower(category) LIKE lower('%' || $1 || '%')",
+          values: [filtervalue],
+        };
+      }
+    }
+
+    // mengambil data sort dan order
+    let sort = "id";
+    let order = "ASC";
+    if (bySort !== undefined && byOrder !== undefined) {
+      // cek isi query sortir
+      if (query.sort !== "time" && query.sort !== "price") {
+        throw new InvariantError("Value Sort is not valid");
+      }
+      sort = query.sort === "time" ? "created_at" : sort;
+      sort = query.sort === "price" ? "price" : sort;
+      order = query.order === "desc" ? "DESC" : "ASC";
+
+      querySQL.text += " ORDER BY " + sort + " " + order;
+    }
+    const resultCount = await dbconect.query(querySQL);
+    // pagination
+    const { page = 1, limit = 3 } = query;
+    const offset = parseInt(page - 1) * Number(limit);
+    const val = querySQL.values.length;
+    querySQL.text += ` LIMIT $${val + 1} OFFSET $${val + 2}`;
+    querySQL.values.push(limit, offset);
+
+    const result = await dbconect.query(querySQL);
+    if (!result.rows.length) {
+      throw new NotFoundError(`Data is Not Found`);
+    }
+
+    result.rows.map((item) => {
+      path = item.img.split("\\");
+      item.img = `/${path[1]}/${path[2]}/${path[3]}`;
+    });
+    const data = {
+      data: result.rows,
+    };
+
+    // data pagination
+    data.totalData = parseInt(resultCount.rowCount);
     data.totalPage = Math.ceil(data.totalData / parseInt(limit));
     return data;
   } catch (error) {
@@ -111,14 +165,14 @@ const getProducts = async (query) => {
 const getProductById = async (id) => {
   try {
     const query =
-      "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, p.updated_at, s.size, s.quantity, s.price FROM product p LEFT JOIN stock s ON p.id  = s.product_id WHERE p.id = $1 ORDER BY price DESC";
+      "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, p.updated_at, s.size, s.quantity, s.price FROM sales ss LEFT JOIN stock s ON ss.stock_id = s.id LEFT JOIN product p ON s.product_id = p.id WHERE p.id = $1 ORDER BY price DESC";
     const result = await dbconect.query(query, [id]);
     if (!result.rows.length) {
       throw new NotFoundError("Product Data By Id is Not Found");
     }
     path = result.rows[0].img.split("\\");
     result.rows[0].img = `/${path[1]}/${path[2]}/${path[3]}`;
-    return result.rows[0];
+    return result.rows;
   } catch (error) {
     if (error instanceof NotFoundError) {
       throw new NotFoundError(error.message);
@@ -241,4 +295,5 @@ module.exports = {
   deleteProductById,
   getJustProductById,
   getProducts,
+  getFavoriteProducts,
 };

@@ -118,7 +118,7 @@ const createTransaction = async (req, res) => {
 const readDetailTransactionById = async (req, res) => {
   try {
     const { id } = req.params;
-    const transactionResult = await transaction.getTransactions(id);
+    const transactionResult = await transaction.getTransactions(null, id, null);
     const salesResult = await sales.getSalesByTransaction(id);
 
     // total transaction
@@ -165,8 +165,9 @@ const readDetailTransactionById = async (req, res) => {
 
 const readAllData = async (req, res) => {
   try {
+    const payload = await decode.decodeToken(req.header("Authorization"));
     req.query.page = req.query.page === undefined ? 1 : req.query.page;
-    const result = await transaction.getTransactions(null, req.query);
+    const result = await transaction.getTransactions(payload, null, req.query);
 
     const { totalData, totalPage, data } = result;
     let datatrans = [];

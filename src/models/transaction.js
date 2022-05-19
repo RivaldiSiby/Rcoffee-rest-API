@@ -36,8 +36,28 @@ const postTransaction = async (id, body) => {
   }
 };
 
-const getTransactions = async (id = null, queryData) => {
+const getTransactions = async (userdata = null, id = null, queryData) => {
   try {
+    // cek userdata dan role adalah costumer atau bukan
+    if (userdata !== null && userdata.role === "costumer") {
+      const { page = 1, limit = 3 } = queryData;
+      const offset = parseInt(page - 1) * Number(limit);
+      const querySql =
+        "SELECT t.id, t.user_id, t.coupon, t.delivery_cost, t.tax, t.created_at, t.updated_at, SUM(s.total) AS Item_Total,SUM(s.quantity) AS quantity_items FROM transaction t INNER JOIN sales s on t.id = s.transaction_id WHERE t.user_id = $1 GROUP BY t.id LIMIT $2 OFFSET $3 ";
+      const result = await dbconect.query(querySql, [
+        userdata.id,
+        limit,
+        offset,
+      ]);
+      const data = {
+        data: result.rows,
+      };
+      // data pagination
+      data.totalData = parseInt(result.rowCount);
+      data.totalPage = Math.ceil(data.totalData / parseInt(limit));
+      return data;
+    }
+
     if (id === null) {
       const { page = 1, limit = 3 } = queryData;
       const offset = parseInt(page - 1) * Number(limit);

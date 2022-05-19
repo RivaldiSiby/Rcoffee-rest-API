@@ -61,6 +61,59 @@ const readProducts = async (req, res) => {
     );
   }
 };
+const readFavoriteProducts = async (req, res) => {
+  try {
+    req.query.page = req.query.page === undefined ? 1 : req.query.page;
+    const result = await product.getFavoriteProducts(req.query);
+
+    // pagination
+    const { totalData, totalPage, data } = result;
+
+    const nextPage = parseInt(req.query.page) + 1;
+    const prevPage = parseInt(req.query.page) - 1;
+    // path query
+    let queryPath = "";
+    queryPath +=
+      req.query.category !== undefined ? `category=${req.query.category}&` : "";
+    queryPath += req.query.name !== undefined ? `name=${req.query.name}&` : "";
+    queryPath +=
+      req.query.limit !== undefined ? `limit=${req.query.limit}&` : "";
+    // path query
+    let next =
+      nextPage > totalPage
+        ? {}
+        : { next: `/product?${queryPath}page=${nextPage}` };
+    let prev =
+      req.query.page <= 1
+        ? {}
+        : { prev: `/product?${queryPath}page=${prevPage}` };
+    const meta = {
+      totalData: totalData,
+      totalPage: totalPage,
+      page: req.query.page,
+      ...next,
+      ...prev,
+    };
+    return response.isSuccessHaveAllData(
+      res,
+      200,
+      data,
+      meta,
+      "Read Data has been success"
+    );
+  } catch (error) {
+    if (error instanceof ClientError) {
+      return response.isError(res, error.statusCode, error.message);
+    }
+    //   error server
+    console.log(error);
+    return response.isError(
+      res,
+      500,
+      "Sorry, there was a failure on our server"
+    );
+  }
+};
 
 const readProductById = async (req, res) => {
   try {
@@ -126,6 +179,7 @@ const editProductById = async (req, res) => {
     // atur data patch
     // hapus gambar
     if (file !== null && data[0].img !== null) {
+      data[0].img = "public" + data[0].img;
       await deleteFiles.imgFiles(data[0].img);
     }
     data[0].img = file !== null ? file.path : data[0].img;
@@ -179,6 +233,7 @@ const deleteProductById = async (req, res) => {
 
 module.exports = {
   readProducts,
+  readFavoriteProducts,
   readProductById,
   createProduct,
   editProductById,
