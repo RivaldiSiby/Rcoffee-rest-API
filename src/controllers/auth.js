@@ -7,19 +7,29 @@ const response = require("../helper/response");
 
 const register = async (req, res) => {
   try {
-    const { file = null } = req;
-    if (file === null) {
-      throw new InvariantError("Photo is required");
-    }
-    const filename = file !== null ? file.path : null;
-    const body = { ...req.body, img: filename };
-    const result = await auth.registerUser(body);
+    const result = await auth.registerUser(req.body);
     return response.isSuccessHaveData(
       res,
       201,
       { id: result },
       "Register Success"
     );
+  } catch (error) {
+    console.log(error);
+    if (error instanceof ClientError) {
+      return response.isError(res, error.statusCode, error.message);
+    }
+    return response.isError(
+      res,
+      500,
+      "Sorry, there was a failure on our server"
+    );
+  }
+};
+const logOut = async (req, res) => {
+  try {
+    await auth.deleteRefreshToken(req.params.refresh);
+    response.isSuccessNoData(res, 200, "Logout Success");
   } catch (error) {
     console.log(error);
     if (error instanceof ClientError) {
@@ -49,15 +59,31 @@ const signIn = async (req, res) => {
       role: datauser.role,
     };
 
-    const jwtOptions = {
+    const jwtOptionsToken = {
       issuer: process.env.JWT_ISSUER,
-      expiresIn: "1000s", // expired in 1000s
+      expiresIn: "60s", // expired in 1000s
     };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, jwtOptions);
+    const jwtOptionsRefreshToken = {
+      issuer: process.env.JWT_ISSUER,
+      expiresIn: "1d", // expired in 1000s
+    };
+    const token = await jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      jwtOptionsToken
+    );
+    const refreshToken = await jwt.sign(
+      payload,
+      process.env.JWT_REFRESH_SECRET,
+      jwtOptionsRefreshToken
+    );
+    // push ke database refresh tokenya
+    await auth.postToken(refreshToken);
+
     return response.isSuccessHaveData(
       res,
       200,
-      { email, token },
+      { email, img: datauser.img, token, refreshToken },
       "Sign In Success"
     );
   } catch (error) {
@@ -74,4 +100,4 @@ const signIn = async (req, res) => {
   }
 };
 
-module.exports = { signIn, register };
+module.exports = { signIn, register, logOut };

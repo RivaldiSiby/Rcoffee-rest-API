@@ -39,6 +39,7 @@ const readPromosAll = async (req, res) => {
       "Read Data has been success"
     );
   } catch (error) {
+    console.log(error);
     if (error instanceof ClientError) {
       return response.isError(res, error.statusCode, error.message);
     }

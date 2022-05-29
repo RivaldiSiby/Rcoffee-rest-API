@@ -9,36 +9,22 @@ const dbconect = new Pool();
 const registerUser = async (body) => {
   try {
     const id = `user-${nanoid(16)}`;
-    const {
-      name,
-      email,
-      password,
-      phone,
-      date_birth,
-      gender,
-      address,
-      role,
-      img,
-    } = body;
+    const role = "role-vn3RBLGG7AUlHjta";
+    const { email, password, phone } = body;
     const created_at = new Date().toISOString();
     const updated_at = created_at;
     const hashPassword = await bcrypt.hash(password, 10);
 
     const query =
-      "INSERT INTO users VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id";
+      "INSERT INTO users (id, email, password, phone, role, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id";
     const result = await dbconect.query(query, [
       id,
-      name,
       email,
       hashPassword,
       phone,
-      date_birth,
-      gender,
-      address,
       role,
       created_at,
       updated_at,
-      img,
     ]);
     if (!result.rows.length) {
       throw new InvariantError("Failed to Register");
@@ -57,11 +43,13 @@ const registerUser = async (body) => {
 const verifyUserByEmail = async (email) => {
   try {
     const query =
-      "SELECT u.id,u.email,u.password,r.name AS role FROM users u INNER JOIN role r ON u.role = r.id WHERE email = $1";
+      "SELECT u.id,u.email,u.password,u.img,r.name AS role FROM users u INNER JOIN role r ON u.role = r.id WHERE email = $1";
     const result = await dbconect.query(query, [email]);
     if (!result.rows.length) {
       throw new InvariantError("Email is not registered Or Password is Wrong");
     }
+    const path = result.rows[0].img.split("\\");
+    result.rows[0].img = `/${path[1]}/${path[2]}/${path[3]}`;
     return result.rows[0];
   } catch (error) {
     if (error instanceof NotFoundError) {
@@ -91,5 +79,65 @@ const verifyByEmail = async (email) => {
     throw new Error(error.message);
   }
 };
+const postToken = async (token) => {
+  try {
+    const id = `token-${nanoid(16)}`;
+    const query = "INSERT INTO auth VALUES ($1,$2) RETURNING id";
+    const result = await dbconect.query(query, [id, token]);
+    if (!result.rows.length) {
+      throw new InvariantError("Failed to add token");
+    }
+    return result.rows[0].id;
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+    if (error instanceof ClientError) {
+      throw error;
+    }
+    throw new Error(error.message);
+  }
+};
+const verifyRefreshToken = async (token) => {
+  try {
+    const query = "SELECT token FROM auth WHERE token = $1";
+    const result = await dbconect.query(query, [token]);
+    if (!result.rows.length) {
+      throw new InvariantError("Refresh Token not valid");
+    }
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+    if (error instanceof ClientError) {
+      throw error;
+    }
+    throw new Error(error.message);
+  }
+};
+const deleteRefreshToken = async (token) => {
+  try {
+    const query = "DELETE FROM auth WHERE token = $1";
+    const result = await dbconect.query(query, [token]);
+    if (!result.rows.length) {
+      throw new InvariantError("Refresh Token not valid");
+    }
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+    if (error instanceof ClientError) {
+      throw error;
+    }
+    throw new Error(error.message);
+  }
+};
 
-module.exports = { verifyUserByEmail, verifyByEmail, registerUser };
+module.exports = {
+  verifyUserByEmail,
+  verifyByEmail,
+  registerUser,
+  verifyRefreshToken,
+  postToken,
+  deleteRefreshToken,
+};

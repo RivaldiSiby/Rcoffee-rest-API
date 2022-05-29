@@ -53,6 +53,7 @@ const readUserById = async (req, res) => {
     if (error instanceof ClientError) {
       return response.isError(res, error.statusCode, error.message);
     }
+    console.log(error);
     return response.isError(
       res,
       500,

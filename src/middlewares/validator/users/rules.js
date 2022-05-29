@@ -6,7 +6,7 @@ const rulesPost = Joi.object({
   password: Joi.string().min(8).required(),
   phone: Joi.number().min(11).required(),
   date_birth: Joi.string().required(),
-  gender: Joi.string().valid("man", "woman").required(),
+  gender: Joi.string().valid("male", "female").required(),
   address: Joi.string().required(),
   role: Joi.string().required(),
   description: Joi.string().required(),

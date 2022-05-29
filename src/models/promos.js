@@ -9,11 +9,18 @@ const getPromosAll = async (query) => {
     // pagination
     const { page = 1, limit = 3 } = query;
     const offset = parseInt(page - 1) * Number(limit);
-    const querySql = "SELECT * FROM promos LIMIT $1 OFFSET $2";
+    const querySql =
+      "SELECT p.id,pp.name,pp.img,p.discount,p.coupon,p.description,p.created_at,p.updated_at FROM promos p INNER JOIN product pp ON p.product_id = pp.id LIMIT $1 OFFSET $2";
     const result = await dbconect.query(querySql, [limit, offset]);
+
+    result.rows.map((item) => {
+      path = item.img.split("\\");
+      item.img = `/${path[1]}/${path[2]}/${path[3]}`;
+    });
     const data = {
       data: result.rows,
     };
+
     // data pagination
     const count = await dbconect.query("SELECT COUNT(*) AS total FROM promos");
     data.totalData = parseInt(count.rows[0]["total"]);

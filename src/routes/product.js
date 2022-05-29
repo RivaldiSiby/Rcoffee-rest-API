@@ -19,9 +19,9 @@ const multer = require("multer");
 const uploadHandler = upload.imageUploadProduct.single("photo");
 // Router list
 
-Router.get("/", auth.checkToken, readProducts);
-Router.get("/favorite", auth.checkToken, readFavoriteProducts);
-Router.get("/:id", auth.checkToken, readProductById);
+Router.get("/", readProducts);
+Router.get("/favorite", readFavoriteProducts);
+Router.get("/:id", readProductById);
 Router.post(
   "/",
   auth.checkToken,

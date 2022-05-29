@@ -13,7 +13,7 @@ const {
 } = promosController;
 
 // router list
-Router.get("/", auth.checkToken, auth.checkRole, readPromosAll);
+Router.get("/", readPromosAll);
 Router.get("/:id", auth.checkToken, readPromosById);
 Router.post(
   "/",

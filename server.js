@@ -1,7 +1,8 @@
 require("dotenv").config();
 // express
 const express = require("express");
-const bodyParser = require("body-parser");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
 
 // time zone WIB
 // process.env.TZ = "Asia/Jakarta";
@@ -23,6 +24,8 @@ const init = async () => {
     await server.use(
       logger(":method :url :status :res[content-length] - :response-time ms")
     );
+    // handler/middlaware cookie
+    await server.use(cookieParser());
     await server.use(express.static("public"));
     // handler/middleware urlencoded
     await server.use(express.urlencoded({ extended: false }));
@@ -30,6 +33,14 @@ const init = async () => {
     // handler/middleware raw json
     await server.use(express.text());
     await server.use(express.json());
+
+    // pasang cors
+    const corsOptions = {
+      origin: ["http://localhost:3000"],
+      methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    };
+    server.use(cors(corsOptions));
     // router
     await server.use(mainRouter);
 
