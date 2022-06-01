@@ -2,6 +2,8 @@ const Joi = require("joi");
 
 const rulesPost = Joi.object({
   name: Joi.string().required(),
+  first_name: Joi.string().required(),
+  last_name: Joi.string().required(),
   email: Joi.string().email().required(),
   password: Joi.string().min(8).required(),
   phone: Joi.number().min(11).required(),
@@ -13,11 +15,13 @@ const rulesPost = Joi.object({
 });
 const rulesPatch = Joi.object({
   name: Joi.string(),
+  first_name: Joi.string(),
+  last_name: Joi.string(),
   email: Joi.string().email(),
   password: Joi.string().min(8),
   phone: Joi.number().min(11),
   date_birth: Joi.string(),
-  gender: Joi.string().valid("man", "woman"),
+  gender: Joi.string().valid("male", "female"),
   address: Joi.string(),
   role: Joi.string(),
   description: Joi.string(),

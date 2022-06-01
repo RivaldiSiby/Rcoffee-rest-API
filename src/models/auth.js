@@ -48,8 +48,10 @@ const verifyUserByEmail = async (email) => {
     if (!result.rows.length) {
       throw new InvariantError("Email is not registered Or Password is Wrong");
     }
-    const path = result.rows[0].img.split("\\");
-    result.rows[0].img = `/${path[1]}/${path[2]}/${path[3]}`;
+    if (result.rows[0].img !== null) {
+      const path = result.rows[0].img.split("\\");
+      result.rows[0].img = `/${path[1]}/${path[2]}/${path[3]}`;
+    }
     return result.rows[0];
   } catch (error) {
     if (error instanceof NotFoundError) {

@@ -52,7 +52,11 @@ const signIn = async (req, res) => {
     if (!cekpass) {
       throw new InvariantError("Email is not registered Or Password is Wrong");
     }
+    // cek gambar
+    const imgName =
+      datauser.img !== null ? datauser.img : "/img/users/usericon.png";
     // generate jwt
+    console.log(datauser);
     const payload = {
       id: datauser.id,
       email,
@@ -83,7 +87,7 @@ const signIn = async (req, res) => {
     return response.isSuccessHaveData(
       res,
       200,
-      { email, img: datauser.img, token, refreshToken },
+      { email, img: imgName, token, refreshToken },
       "Sign In Success"
     );
   } catch (error) {

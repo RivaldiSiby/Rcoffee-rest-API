@@ -12,6 +12,14 @@ exports.up = (pgm) => {
       type: "VARCHAR(255)",
       notNull: true,
     },
+    first_name: {
+      type: "VARCHAR(255)",
+      notNull: true,
+    },
+    last_name: {
+      type: "VARCHAR(255)",
+      notNull: true,
+    },
     email: {
       type: "VARCHAR(255)",
       notNull: true,

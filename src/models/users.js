@@ -41,14 +41,16 @@ const getUsers = async (query) => {
 const getUserById = async (id) => {
   try {
     const query =
-      "SELECT id,name,email,phone,date_birth,gender,address,img FROM users WHERE id = $1 ";
+      "SELECT id,name,email,phone,date_birth,gender,address,img,last_name,first_name FROM users WHERE id = $1 ";
     const result = await dbconect.query(query, [id]);
     if (!result.rows.length) {
       throw new NotFoundError("User Data By Id is not Found");
     }
     // generate img link
-    path = result.rows[0].img.split("\\");
-    result.rows[0].img = `/${path[1]}/${path[2]}/${path[3]}`;
+    if (result.rows[0].img !== null) {
+      const path = result.rows[0].img.split("\\");
+      result.rows[0].img = `/${path[1]}/${path[2]}/${path[3]}`;
+    }
     return result.rows[0];
   } catch (error) {
     if (error instanceof NotFoundError) {
@@ -140,12 +142,14 @@ const patchUserById = async (id, body) => {
       address,
       role,
       img,
+      first_name,
+      last_name,
     } = body;
     const hashPassword =
       password.length >= 60 ? password : await bcrypt.hash(password, 10);
     const updated_at = new Date().toISOString();
     const query =
-      "UPDATE users SET name=$1, email=$2, password=$3, phone=$4, date_birth=$5, gender=$6, address=$7, role=$8, updated_at=$9,img=$10 WHERE id=$11 RETURNING id";
+      "UPDATE users SET name=$1, email=$2, password=$3, phone=$4, date_birth=$5, gender=$6, address=$7, role=$8, updated_at=$9,img=$10,first_name=$11,last_name=$12 WHERE id=$13 RETURNING id";
     const result = await dbconect.query(query, [
       name,
       email,
@@ -157,6 +161,8 @@ const patchUserById = async (id, body) => {
       role,
       updated_at,
       img,
+      first_name,
+      last_name,
       id,
     ]);
     if (!result.rows.length) {

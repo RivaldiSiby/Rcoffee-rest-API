@@ -105,6 +105,12 @@ const editUserById = async (req, res) => {
     // atur data patch
     data[0].img = file !== null ? file.path : data[0].img;
     data[0].name = req.body.name !== undefined ? req.body.name : data[0].name;
+    data[0].first_name =
+      req.body.first_name !== undefined
+        ? req.body.first_name
+        : data[0].first_name;
+    data[0].last_name =
+      req.body.last_name !== undefined ? req.body.last_name : data[0].last_name;
     data[0].email =
       req.body.email !== undefined ? req.body.email : data[0].email;
     data[0].password =
@@ -126,6 +132,7 @@ const editUserById = async (req, res) => {
 
     return response.isSuccessNoData(res, 200, "Update Data has been success");
   } catch (error) {
+    console.log(error);
     if (error instanceof ClientError) {
       return response.isError(res, error.statusCode, error.message);
     }
