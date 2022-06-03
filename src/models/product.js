@@ -12,14 +12,14 @@ const getFavoriteProducts = async (query) => {
     const byName = Object.keys(query).find((item) => item === "name");
 
     let querySQL = {
-      text: "select p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price, SUM(ss.quantity)as sold FROM sales ss LEFT JOIN stock s ON ss.stock_id = s.id LEFT JOIN product p ON s.product_id = p.id GROUP BY p.id,s.id ORDER BY sold desc",
+      text: "select p.id, s.id AS stock_id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price, SUM(ss.quantity)as sold FROM sales ss LEFT JOIN stock s ON ss.stock_id = s.id LEFT JOIN product p ON s.product_id = p.id GROUP BY p.id,s.id ORDER BY sold desc",
       values: [],
     };
 
     // ketika difilter dengan nama dan catagory
     if (byName !== undefined && byCategory !== undefined) {
       querySQL = {
-        text: "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price, SUM(ss.quantity)as penjualan FROM sales ss LEFT JOIN stock s ON ss.stock_id = s.id LEFT JOIN product p ON s.product_id = p.id WHERE lower(name) LIKE lower('%' || $1 || '%') AND lower(category) LIKE lower('%' || $2 || '%') GROUP BY p.id,s.id ORDER BY penjualan desc",
+        text: "SELECT p.id, s.id AS stock_id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price, SUM(ss.quantity)as penjualan FROM sales ss LEFT JOIN stock s ON ss.stock_id = s.id LEFT JOIN product p ON s.product_id = p.id WHERE lower(name) LIKE lower('%' || $1 || '%') AND lower(category) LIKE lower('%' || $2 || '%') GROUP BY p.id,s.id ORDER BY penjualan desc",
         values: [query.name, query.category],
       };
     }
@@ -30,12 +30,12 @@ const getFavoriteProducts = async (query) => {
       if (filterkey === "name") {
         // pengecekan order by desc / asc
         querySQL = {
-          text: "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price, SUM(ss.quantity)as penjualan FROM sales ss LEFT JOIN stock s ON ss.stock_id = s.id LEFT JOIN product p ON s.product_id = p.id WHERE lower(name) LIKE lower('%' || $1 || '%') GROUP BY p.id,s.id ORDER BY penjualan desc",
+          text: "SELECT p.id, s.id AS stock_id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price, SUM(ss.quantity)as penjualan FROM sales ss LEFT JOIN stock s ON ss.stock_id = s.id LEFT JOIN product p ON s.product_id = p.id WHERE lower(name) LIKE lower('%' || $1 || '%') GROUP BY p.id,s.id ORDER BY penjualan desc",
           values: [filtervalue],
         };
       } else {
         querySQL = {
-          text: "SELECT p.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price, SUM(ss.quantity)as penjualan FROM sales ss LEFT JOIN stock s ON ss.stock_id = s.id LEFT JOIN product p ON s.product_id = p.id WHERE category = $1 GROUP BY p.id,s.id ORDER BY penjualan desc",
+          text: "SELECT p.id, s.id AS stock_id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price, SUM(ss.quantity)as penjualan FROM sales ss LEFT JOIN stock s ON ss.stock_id = s.id LEFT JOIN product p ON s.product_id = p.id WHERE category = $1 GROUP BY p.id,s.id ORDER BY penjualan desc",
           values: [filtervalue],
         };
       }
@@ -83,14 +83,14 @@ const getProducts = async (query) => {
     const byOrder = Object.keys(query).find((item) => item === "order");
 
     let querySQL = {
-      text: "SELECT p.id,s.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p INNER JOIN stock s ON s.product_id = p.id ",
+      text: "SELECT p.id,  s.id AS stock_id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p INNER JOIN stock s ON s.product_id = p.id ",
       values: [],
     };
 
     // ketika difilter dengan nama dan catagory
     if (byName !== undefined && byCategory !== undefined) {
       querySQL = {
-        text: "SELECT p.id,s.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p INNER JOIN stock s ON s.product_id = p.id WHERE lower(name) LIKE lower('%' || $1 || '%') AND lower(category) LIKE lower('%' || $2 || '%') ",
+        text: "SELECT p.id, s.id AS stock_id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p INNER JOIN stock s ON s.product_id = p.id WHERE lower(name) LIKE lower('%' || $1 || '%') AND lower(category) LIKE lower('%' || $2 || '%') ",
         values: [query.name, query.category],
       };
     }
@@ -101,12 +101,12 @@ const getProducts = async (query) => {
       if (filterkey === "name") {
         // pengecekan order by desc / asc
         querySQL = {
-          text: "SELECT p.id,s.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p INNER JOIN stock s ON s.product_id = p.id WHERE lower(name) LIKE lower('%' || $1 || '%')",
+          text: "SELECT p.id, s.id AS stock_id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p INNER JOIN stock s ON s.product_id = p.id WHERE lower(name) LIKE lower('%' || $1 || '%')",
           values: [filtervalue],
         };
       } else {
         querySQL = {
-          text: "SELECT p.id,s.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p INNER JOIN stock s ON s.product_id = p.id WHERE category = $1",
+          text: "SELECT p.id, s.id AS stock_id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p INNER JOIN stock s ON s.product_id = p.id WHERE category = $1",
           values: [filtervalue],
         };
       }
@@ -165,13 +165,16 @@ const getProducts = async (query) => {
 const getProductById = async (id) => {
   try {
     const query =
-      "SELECT p.id,s.id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p INNER JOIN stock s ON s.product_id = p.id WHERE p.id = $1 ORDER BY price DESC";
+      "SELECT p.id, s.id AS stock_id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p INNER JOIN stock s ON s.product_id = p.id WHERE p.id = $1 ORDER BY price DESC";
     const result = await dbconect.query(query, [id]);
     if (!result.rows.length) {
       throw new NotFoundError("Product Data By Id is Not Found");
     }
-    const path = result.rows[0].img.split("\\");
-    result.rows[0].img = `/${path[1]}/${path[2]}/${path[3]}`;
+
+    result.rows.map((item) => {
+      const path = item.img.split("\\");
+      item.img = `/${path[1]}/${path[2]}/${path[3]}`;
+    });
     return result.rows;
   } catch (error) {
     if (error instanceof NotFoundError) {
