@@ -14,8 +14,9 @@ const checkDuplicate = async (req, res, next) => {
     return response.isError(res, error.statusCode, error.message);
   }
 };
-const checkRefresh = async (refreshToken) => {
+const checkRefresh = async (req, res, next) => {
   try {
+    const refreshToken = req.params.refresh;
     // cek token dari database
     await auth.verifyRefreshToken(refreshToken);
     let keyToken = refreshToken;
@@ -32,26 +33,23 @@ const checkRefresh = async (refreshToken) => {
     // generate access token
     const jwtOptionsToken = {
       issuer: process.env.JWT_ISSUER,
-      expiresIn: "60s", // expired in 60s
+      expiresIn: "15s", // expired in 15s
     };
     const token = jwt.sign(payload, process.env.JWT_SECRET, jwtOptionsToken);
 
-    return token;
+    response.isSuccessHaveData(res, 201, { token: token }, "Token Generate");
   } catch (error) {
     if (
       error.name === "JsonWebTokenError" ||
       error.name === "TokenExpiredError" ||
       error.name === "NotBeforeError"
     ) {
-      throw error;
+      return response.isError(res, 401, "Sign in needed");
     }
     if (error instanceof ClientError) {
-      // console.log(error.statusCode);
-      throw error;
-      // return response.isError(res, 400, error.message);
+      return response.isError(res, 400, error.message);
     }
-    console.log(error);
-    throw error;
+    return response.isError(res, 500, error.message);
   }
 };
 
@@ -71,24 +69,6 @@ const checkToken = async (req, res, next) => {
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {
-      const refreshToken = req.params.refresh;
-
-      // cek refresh token
-      if (refreshToken !== undefined) {
-        const data = await checkRefresh(refreshToken)
-          .then((data) => {
-            return data;
-          })
-          .catch((err) => err);
-        if (data.length > 0) {
-          return response.isSuccessHaveData(
-            res,
-            200,
-            { accessToken: data },
-            "token generate"
-          );
-        }
-      }
       return response.isError(res, 401, "Sign in needed");
     }
     if (error.name === "JsonWebTokenError" || error.name === "NotBeforeError") {
@@ -168,4 +148,10 @@ const checkRole = async (req, res, next) => {
   }
 };
 
-module.exports = { checkDuplicate, checkToken, checkRole, checkUserId };
+module.exports = {
+  checkDuplicate,
+  checkRefresh,
+  checkToken,
+  checkRole,
+  checkUserId,
+};

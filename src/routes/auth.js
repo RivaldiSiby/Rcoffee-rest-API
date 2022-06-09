@@ -14,10 +14,8 @@ Router.post(
   authValidator.authValidatorSignIn.validator,
   authController.signIn
 );
-Router.get("/:refresh", auth.checkToken, (req, res) => {
-  response.isSuccessNoData(res, 200, " you are already signed in");
-});
-Router.delete("/:refresh", auth.checkToken, authController.logOut);
+Router.get("/:refresh", auth.checkRefresh);
+Router.delete("/:refresh", auth.checkRefresh, authController.logOut);
 Router.post(
   "/register",
   auth.checkDuplicate,

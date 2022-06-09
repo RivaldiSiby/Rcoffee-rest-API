@@ -48,6 +48,11 @@ const getSalesByTransaction = async (transaction) => {
       );
     }
 
+    result.rows.map((item) => {
+      const path = item.img.split("\\");
+      item.img = `/${path[1]}/${path[2]}/${path[3]}`;
+    });
+
     result.rows = [
       ...result.rows,
       {

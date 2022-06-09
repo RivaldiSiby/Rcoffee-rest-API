@@ -56,7 +56,6 @@ const signIn = async (req, res) => {
     const imgName =
       datauser.img !== null ? datauser.img : "/img/users/usericon.png";
     // generate jwt
-    console.log(datauser);
     const payload = {
       id: datauser.id,
       email,
@@ -65,11 +64,11 @@ const signIn = async (req, res) => {
 
     const jwtOptionsToken = {
       issuer: process.env.JWT_ISSUER,
-      expiresIn: "60s", // expired in 1000s
+      expiresIn: "15s", // expired in 15s
     };
     const jwtOptionsRefreshToken = {
       issuer: process.env.JWT_ISSUER,
-      expiresIn: "1d", // expired in 1000s
+      expiresIn: "1d", // expired in 1d
     };
     const token = await jwt.sign(
       payload,

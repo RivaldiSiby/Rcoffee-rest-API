@@ -5,6 +5,7 @@ const rulesBody = Joi.object({
   delivery_cost: Joi.string().allow(null),
   tax: Joi.string().allow(null),
   products: Joi.array().required(),
+  payment_method: Joi.string().required(),
 });
 
 module.exports = { rulesBody };
