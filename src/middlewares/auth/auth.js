@@ -44,10 +44,11 @@ const checkRefresh = async (req, res, next) => {
       error.name === "TokenExpiredError" ||
       error.name === "NotBeforeError"
     ) {
+      await auth.deleteRefreshToken(req.params.refresh);
       return response.isError(res, 401, "Sign in needed");
     }
     if (error instanceof ClientError) {
-      return response.isError(res, 400, error.message);
+      return response.isError(res, 401, error.message);
     }
     return response.isError(res, 500, error.message);
   }

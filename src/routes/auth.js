@@ -15,7 +15,7 @@ Router.post(
   authController.signIn
 );
 Router.get("/:refresh", auth.checkRefresh);
-Router.delete("/:refresh", auth.checkRefresh, authController.logOut);
+Router.delete("/:refresh", authController.logOut);
 Router.post(
   "/register",
   auth.checkDuplicate,
