@@ -1,5 +1,6 @@
 const ClientError = require("../exceptions/ClientError");
 const auth = require("../models/auth");
+const users = require("../models/users");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const InvariantError = require("../exceptions/InvariantError");
@@ -53,6 +54,7 @@ const signIn = async (req, res) => {
       throw new InvariantError("Email is not registered Or Password is Wrong");
     }
     // cek gambar
+    const user = await users.getUserById(datauser.id);
     const imgName =
       datauser.img !== null ? datauser.img : "/img/users/usericon.png";
     // generate jwt
@@ -86,7 +88,7 @@ const signIn = async (req, res) => {
     return response.isSuccessHaveData(
       res,
       200,
-      { email, img: imgName, token, refreshToken },
+      { datauser: user, img: imgName, token, refreshToken },
       "Sign In Success"
     );
   } catch (error) {
