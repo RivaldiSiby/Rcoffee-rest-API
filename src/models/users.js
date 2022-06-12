@@ -41,7 +41,7 @@ const getUsers = async (query) => {
 const getUserById = async (id) => {
   try {
     const query =
-      "SELECT id,name,email,phone,date_birth,gender,address,img,last_name,first_name FROM users WHERE id = $1 ";
+      "SELECT u.id,u.name,u.email,u.phone,u.date_birth,u.gender,u.address,u.img,u.last_name,u.first_name,r.name as role  FROM users u INNER JOIN role r ON u.role = r.id WHERE u.id = $1 ";
     const result = await dbconect.query(query, [id]);
     if (!result.rows.length) {
       throw new NotFoundError("User Data By Id is not Found");
