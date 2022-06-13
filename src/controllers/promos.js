@@ -77,8 +77,14 @@ const readPromosById = async (req, res) => {
 
 const createPromos = async (req, res) => {
   try {
+    const { file = null } = req;
+    if (file === null) {
+      throw new InvariantError("Photo is required");
+    }
+    const filename = file !== null ? file.path : null;
+    const body = { ...req.body, img: filename };
     await product.getJustProductById(req.body.product_id);
-    const result = await promos.postPromos(req.body);
+    const result = await promos.postPromos(body);
     return response.isSuccessHaveData(
       res,
       201,

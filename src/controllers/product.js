@@ -5,6 +5,28 @@ const stock = require("../models/stock");
 const deleteFiles = require("../helper/delete");
 const InvariantError = require("../exceptions/InvariantError");
 
+const readJustProducts = async (req, res) => {
+  try {
+    const result = await product.getJustProduct();
+    return response.isSuccessHaveData(
+      res,
+      200,
+      result,
+      "Read Data has been success"
+    );
+  } catch (error) {
+    if (error instanceof ClientError) {
+      return response.isError(res, error.statusCode, error.message);
+    }
+    //   error server
+    console.log(error);
+    return response.isError(
+      res,
+      500,
+      "Sorry, there was a failure on our server"
+    );
+  }
+};
 const readProducts = async (req, res) => {
   try {
     req.query.page = req.query.page === undefined ? 1 : req.query.page;
@@ -238,4 +260,5 @@ module.exports = {
   createProduct,
   editProductById,
   deleteProductById,
+  readJustProducts,
 };

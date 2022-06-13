@@ -45,7 +45,7 @@ const getTransactions = async (userdata = null, id = null, queryData) => {
       const { page = 1, limit = 12 } = queryData;
       const offset = parseInt(page - 1) * Number(limit);
       const querySql =
-        "SELECT t.id, t.user_id, t.coupon, t.delivery_cost, t.tax,t.payment_method, t.created_at, t.updated_at, SUM(s.total) AS Item_Total,SUM(s.quantity) AS quantity_items FROM transaction t INNER JOIN sales s on t.id = s.transaction_id WHERE t.user_id = $1  GROUP BY t.id LIMIT $2 OFFSET $3  ";
+        "SELECT t.id, t.user_id, t.coupon, t.delivery_cost, t.tax,t.payment_method, t.created_at, t.updated_at, SUM(s.total) AS Item_Total,SUM(s.quantity) AS quantity_items,SUM(Item_Total+t.delivery_cost+t.tax) FROM transaction t INNER JOIN sales s on t.id = s.transaction_id WHERE t.user_id = $1  GROUP BY t.id ";
       const result = await dbconect.query(querySql, [
         userdata.id,
         limit,
@@ -87,6 +87,26 @@ const getTransactions = async (userdata = null, id = null, queryData) => {
       throw new NotFoundError("Transaction Data By Id is Not Found");
     }
     return result.rows[0];
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
+    throw new Error(error.message);
+  }
+};
+
+const getTransactionLastDay = async () => {
+  try {
+    const querySql =
+      "SELECT t.id,t.delivery_cost, t.tax,t.payment_method, t.created_at, t.updated_at, SUM(s.total) AS Item_Total,SUM(s.quantity) AS quantity_items FROM transaction t INNER JOIN sales s on t.id = s.transaction_id WHERE t.user_id = $1  GROUP BY t.id ";
+    const result = await dbconect.query(query, [id]);
+    if (!result.rows.length) {
+      throw new NotFoundError("Transaction Data is Not Found");
+    }
+    return result.rows;
   } catch (error) {
     if (error instanceof NotFoundError) {
       throw new NotFoundError(error.message);

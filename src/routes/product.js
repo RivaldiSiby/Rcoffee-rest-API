@@ -11,6 +11,7 @@ const {
   editProductById,
   deleteProductById,
   readFavoriteProducts,
+  readJustProducts,
 } = productController;
 const ClientError = require("../exceptions/ClientError");
 const response = require("../helper/response");
@@ -20,6 +21,7 @@ const uploadHandler = upload.imageUploadProduct.single("photo");
 // Router list
 
 Router.get("/", readProducts);
+Router.get("/product", auth.checkToken, auth.checkRole, readJustProducts);
 Router.get("/favorite", readFavoriteProducts);
 Router.get("/:id", readProductById);
 Router.post(

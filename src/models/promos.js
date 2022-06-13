@@ -10,7 +10,7 @@ const getPromosAll = async (query) => {
     const { page = 1, limit = 3 } = query;
     const offset = parseInt(page - 1) * Number(limit);
     const querySql =
-      "SELECT p.id,pp.name,pp.img,p.discount,p.coupon,p.description,p.created_at,p.updated_at FROM promos p INNER JOIN product pp ON p.product_id = pp.id LIMIT $1 OFFSET $2";
+      "SELECT p.id,pp.name,p.img,p.discount,p.coupon,p.description,p.created_at,p.updated_at FROM promos p INNER JOIN product pp ON p.product_id = pp.id LIMIT $1 OFFSET $2";
     const result = await dbconect.query(querySql, [limit, offset]);
 
     result.rows.map((item) => {
@@ -75,11 +75,21 @@ const getPromosByCoupon = async (coupon) => {
 const postPromos = async (body) => {
   try {
     const id = `discount-${nanoid(16)}`;
-    const { discount, description, coupon, product_id } = body;
+    const {
+      discount,
+      description,
+      coupon,
+      product_id,
+      name,
+      size,
+      period_start,
+      expire,
+      img,
+    } = body;
     const created_at = new Date().toISOString();
     const updated_at = created_at;
     const query =
-      "INSERT INTO promos VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id";
+      "INSERT INTO promos VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id";
     const result = await dbconect.query(query, [
       id,
       discount,
@@ -88,6 +98,11 @@ const postPromos = async (body) => {
       product_id,
       created_at,
       updated_at,
+      name,
+      size,
+      period_start,
+      expire,
+      img,
     ]);
 
     if (!result.rows.length) {

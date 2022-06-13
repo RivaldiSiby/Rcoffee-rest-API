@@ -23,6 +23,16 @@ const imgstorageProduct = multer.diskStorage({
     cb(null, filename);
   },
 });
+const imgstoragePromo = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "./public/img/promos");
+  },
+  filename: (req, file, cb) => {
+    const suffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    const filename = `promos-${suffix}${path.extname(file.originalname)}`;
+    cb(null, filename);
+  },
+});
 
 const limit = {
   fileSize: 2e6,
@@ -51,8 +61,14 @@ const imageUploadProduct = multer({
   limits: limit,
   fileFilter: imageOnlyFilter,
 });
+const imageUploadPromo = multer({
+  storage: imgstoragePromo,
+  limits: limit,
+  fileFilter: imageOnlyFilter,
+});
 
 module.exports = {
   imageUploadProduct,
   imageUploadUser,
+  imageUploadPromo,
 };

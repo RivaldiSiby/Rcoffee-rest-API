@@ -6,6 +6,24 @@ const InvariantError = require("../exceptions/InvariantError");
 const NotFoundError = require("../exceptions/NotFoundError");
 const dbconect = new Pool();
 
+const getJustProduct = async () => {
+  try {
+    const query = "SELECT id,name FROM product";
+    const result = await dbconect.query(query);
+    if (!result.rows.length) {
+      throw new NotFoundError(`Data is Not Found`);
+    }
+    return result.rows;
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
+    throw new Error(error.message);
+  }
+};
 const getFavoriteProducts = async (query) => {
   try {
     const byCategory = Object.keys(query).find((item) => item === "category");
@@ -299,4 +317,5 @@ module.exports = {
   getJustProductById,
   getProducts,
   getFavoriteProducts,
+  getJustProduct,
 };
