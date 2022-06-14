@@ -4,8 +4,13 @@ const Router = express.Router();
 
 const transactionController = require("../controllers/transaction");
 const transactionValidator = require("../middlewares/validator/transaction/index");
-const { createTransaction, readAllData, readDetailTransactionById } =
-  transactionController;
+
+const {
+  readLastDay,
+  createTransaction,
+  readAllData,
+  readDetailTransactionById,
+} = transactionController;
 const auth = require("../middlewares/auth/auth");
 
 // route list
@@ -16,6 +21,7 @@ Router.post(
   createTransaction
 );
 Router.get("/", auth.checkToken, readAllData);
+Router.get("/daily", auth.checkToken, auth.checkRole, readLastDay);
 Router.get("/:id", auth.checkToken, readDetailTransactionById);
 
 module.exports = Router;

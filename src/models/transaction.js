@@ -101,8 +101,8 @@ const getTransactions = async (userdata = null, id = null, queryData) => {
 const getTransactionLastDay = async () => {
   try {
     const querySql =
-      "SELECT t.id,t.delivery_cost, t.tax,t.payment_method, t.created_at, t.updated_at, SUM(s.total) AS Item_Total,SUM(s.quantity) AS quantity_items FROM transaction t INNER JOIN sales s on t.id = s.transaction_id WHERE t.user_id = $1  GROUP BY t.id ";
-    const result = await dbconect.query(query, [id]);
+      "SELECT t.id, t.user_id, t.coupon, t.delivery_cost, t.tax, t.created_at, t.updated_at, SUM(s.total) AS Item_Total,SUM(s.quantity) AS quantity_items FROM transaction t INNER JOIN sales s on t.id = s.transaction_id GROUP BY t.id ";
+    const result = await dbconect.query(querySql);
     if (!result.rows.length) {
       throw new NotFoundError("Transaction Data is Not Found");
     }
@@ -139,4 +139,9 @@ const deleteTransactionById = async (id) => {
   }
 };
 
-module.exports = { deleteTransactionById, getTransactions, postTransaction };
+module.exports = {
+  getTransactionLastDay,
+  deleteTransactionById,
+  getTransactions,
+  postTransaction,
+};

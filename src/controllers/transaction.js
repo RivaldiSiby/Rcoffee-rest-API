@@ -220,4 +220,142 @@ const readAllData = async (req, res) => {
   }
 };
 
-module.exports = { readAllData, createTransaction, readDetailTransactionById };
+const readLastDay = async (req, res) => {
+  try {
+    const result = await transaction.getTransactionLastDay();
+
+    // tarik 7 hari terakhir
+    const dateHandler = (date) => {
+      return new Date(new Date().setDate(date)).toISOString();
+    };
+    let lastDay5 = new Date().getDate() - 5;
+    let lastDay4 = new Date().getDate() - 4;
+    let lastDay3 = new Date().getDate() - 3;
+    let lastDay2 = new Date().getDate() - 2;
+    let lastDay1 = new Date().getDate() - 1;
+    let lastDay0 = new Date().getDate();
+
+    lastDay5 = dateHandler(lastDay5);
+    lastDay4 = dateHandler(lastDay4);
+    lastDay3 = dateHandler(lastDay3);
+    lastDay2 = dateHandler(lastDay2);
+    lastDay1 = dateHandler(lastDay1);
+    lastDay0 = dateHandler(lastDay0);
+
+    const lastDay = [
+      lastDay0,
+      lastDay1,
+      lastDay2,
+      lastDay3,
+      lastDay4,
+      lastDay5,
+    ];
+
+    // total data
+
+    let totalDay0 = 0;
+    let totalDay1 = 0;
+    let totalDay2 = 0;
+    let totalDay3 = 0;
+    let totalDay4 = 0;
+    let totalDay5 = 0;
+
+    result.map((item) => {
+      // cek penjualan dalam satu hari
+
+      if (item.created_at.split("T")[0] === lastDay[0].split("T")[0]) {
+        const total =
+          parseFloat(item.tax) +
+          parseInt(item.delivery_cost) +
+          parseInt(item.item_total);
+        totalDay0 += total;
+      }
+      if (item.created_at.split("T")[0] === lastDay[1].split("T")[0]) {
+        const total =
+          parseFloat(item.tax) +
+          parseInt(item.delivery_cost) +
+          parseInt(item.item_total);
+        totalDay1 += total;
+      }
+      if (item.created_at.split("T")[0] === lastDay[2].split("T")[0]) {
+        const total =
+          parseFloat(item.tax) +
+          parseInt(item.delivery_cost) +
+          parseInt(item.item_total);
+        totalDay2 += total;
+      }
+      if (item.created_at.split("T")[0] === lastDay[3].split("T")[0]) {
+        const total =
+          parseFloat(item.tax) +
+          parseInt(item.delivery_cost) +
+          parseInt(item.item_total);
+        totalDay3 += total;
+      }
+      if (item.created_at.split("T")[0] === lastDay[4].split("T")[0]) {
+        const total =
+          parseFloat(item.tax) +
+          parseInt(item.delivery_cost) +
+          parseInt(item.item_total);
+        totalDay4 += total;
+      }
+      if (item.created_at.split("T")[0] === lastDay[5].split("T")[0]) {
+        const total =
+          parseFloat(item.tax) +
+          parseInt(item.delivery_cost) +
+          parseInt(item.item_total);
+        totalDay5 += total;
+      }
+    });
+
+    const data = {
+      totalDay0: {
+        total: parseInt(totalDay0),
+        date: lastDay[0],
+      },
+      totalDay1: {
+        total: parseInt(totalDay1),
+        date: lastDay[1],
+      },
+      totalDay2: {
+        total: parseInt(totalDay2),
+        date: lastDay[2],
+      },
+      totalDay3: {
+        total: parseInt(totalDay3),
+        date: lastDay[3],
+      },
+      totalDay4: {
+        total: parseInt(totalDay4),
+        date: lastDay[4],
+      },
+      totalDay5: {
+        total: parseInt(totalDay5),
+        date: lastDay[5],
+      },
+    };
+
+    return response.isSuccessHaveData(
+      res,
+      200,
+      data,
+      "Read Data Transaction has been success"
+    );
+  } catch (error) {
+    if (error instanceof ClientError) {
+      return response.isError(res, error.statusCode, error.message);
+    }
+    console.log(error);
+    return response.isError(
+      res,
+      500,
+      "Sorry, there was a failure on our server"
+    );
+  }
+};
+
+module.exports = {
+  readLastDay,
+  readAllData,
+  createTransaction,
+  readDetailTransactionById,
+};
