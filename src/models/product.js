@@ -5,6 +5,7 @@ const ClientError = require("../exceptions/ClientError");
 const InvariantError = require("../exceptions/InvariantError");
 const NotFoundError = require("../exceptions/NotFoundError");
 const dbconect = new Pool();
+const db = require("../config/db");
 
 const getJustProduct = async () => {
   try {
@@ -144,7 +145,7 @@ const getProducts = async (query) => {
 
       querySQL.text += " ORDER BY " + sort + " " + order;
     }
-    const resultCount = await dbconect.query(querySQL);
+    const resultCount = await db.query(querySQL);
     // pagination
     const { page = 1, limit = 3 } = query;
     const offset = parseInt(page - 1) * Number(limit);
@@ -152,7 +153,7 @@ const getProducts = async (query) => {
     querySQL.text += ` LIMIT $${val + 1} OFFSET $${val + 2}`;
     querySQL.values.push(limit, offset);
 
-    const result = await dbconect.query(querySQL);
+    const result = await db.query(querySQL);
     if (!result.rows.length) {
       throw new NotFoundError(`Data is Not Found`);
     }
