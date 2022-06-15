@@ -16,9 +16,6 @@ const logger = require("morgan");
 const db = require("./src/config/db");
 // server
 
-console.log(process.env.HEROKU_POSTGRESQL_ONYX_URL);
-console.log(process.env.PORT);
-
 const init = async (db) => {
   try {
     // conect db
@@ -26,9 +23,11 @@ const init = async (db) => {
     // database check
     console.log("Database Conected");
     // middleware
-    await server.use(
-      logger(":method :url :status :res[content-length] - :response-time ms")
-    );
+    if (process.env.STATUS !== "production") {
+      await server.use(
+        logger(":method :url :status :res[content-length] - :response-time ms")
+      );
+    }
     // handler/middlaware cookie
     await server.use(cookieParser());
     await server.use(express.static("public"));

@@ -4,13 +4,13 @@ const { Pool } = require("pg");
 const ClientError = require("../exceptions/ClientError");
 const InvariantError = require("../exceptions/InvariantError");
 const NotFoundError = require("../exceptions/NotFoundError");
-const dbconect = new Pool();
+
 const db = require("../config/db");
 
 const getJustProduct = async () => {
   try {
     const query = "SELECT id,name FROM product";
-    const result = await dbconect.query(query);
+    const result = await db.query(query);
     if (!result.rows.length) {
       throw new NotFoundError(`Data is Not Found`);
     }
@@ -59,7 +59,7 @@ const getFavoriteProducts = async (query) => {
         };
       }
     }
-    const resultCount = await dbconect.query(querySQL);
+    const resultCount = await db.query(querySQL);
     // pagination
     const { page = 1, limit = 3 } = query;
     const offset = parseInt(page - 1) * Number(limit);
@@ -67,7 +67,7 @@ const getFavoriteProducts = async (query) => {
     querySQL.text += ` LIMIT $${val + 1} OFFSET $${val + 2}`;
     querySQL.values.push(limit, offset);
 
-    const result = await dbconect.query(querySQL);
+    const result = await db.query(querySQL);
     if (!result.rows.length) {
       throw new NotFoundError(`Data is Not Found`);
     }
@@ -185,7 +185,7 @@ const getProductById = async (id) => {
   try {
     const query =
       "SELECT p.id, s.id AS stock_id, p.name ,p.category, p.description, p.img, p.created_at, s.size, s.quantity, s.price FROM product p INNER JOIN stock s ON s.product_id = p.id WHERE p.id = $1 ORDER BY price DESC";
-    const result = await dbconect.query(query, [id]);
+    const result = await db.query(query, [id]);
     if (!result.rows.length) {
       throw new NotFoundError("Product Data By Id is Not Found");
     }
@@ -208,7 +208,7 @@ const getProductById = async (id) => {
 const getJustProductById = async (id) => {
   try {
     const query = "SELECT * FROM product WHERE id = $1";
-    const result = await dbconect.query(query, [id]);
+    const result = await db.query(query, [id]);
     if (!result.rows.length) {
       throw new NotFoundError("Product Data By Id is Not Found");
     }
@@ -233,7 +233,7 @@ const postProduct = async (body) => {
     const query =
       "INSERT INTO product VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id,name,category";
 
-    const result = await dbconect.query(query, [
+    const result = await db.query(query, [
       id,
       name,
       category,
@@ -268,7 +268,7 @@ const patchProduct = async (id, body) => {
 
     const query =
       "UPDATE product SET name=$1, category=$2, description=$3, img=$4, updated_at=$5 WHERE id=$6 RETURNING id";
-    const result = await dbconect.query(query, [
+    const result = await db.query(query, [
       name,
       description,
       category,
@@ -294,7 +294,7 @@ const patchProduct = async (id, body) => {
 const deleteProductById = async (id) => {
   try {
     const query = "DELETE FROM product WHERE id = $1 RETURNING img";
-    const result = await dbconect.query(query, [id]);
+    const result = await db.query(query, [id]);
     if (!result.rows.length) {
       throw new NotFoundError("failed to delete data. Data not found");
     }

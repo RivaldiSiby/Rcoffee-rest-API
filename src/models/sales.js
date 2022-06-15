@@ -1,17 +1,15 @@
 const { nanoid } = require("nanoid");
-const { Pool } = require("pg");
 const ClientError = require("../exceptions/ClientError");
 const InvariantError = require("../exceptions/InvariantError");
 const NotFoundError = require("../exceptions/NotFoundError");
-const dbconect = new Pool();
-
+const db = require("../config/db");
 const postSales = async (body) => {
   try {
     const id = `sales-${nanoid(16)}`;
     const { stock_id, transaction_id, quantity, total } = body;
     const query = "INSERT INTO sales VALUES ($1,$2,$3,$4,$5) RETURNING id";
 
-    const result = await dbconect.query(query, [
+    const result = await db.query(query, [
       id,
       stock_id,
       transaction_id,
@@ -40,8 +38,8 @@ const getSalesByTransaction = async (transaction) => {
       "SELECT p.id, p.name ,p.category, p.description, p.img, ss.transaction_id,  s.size, ss.quantity, s.price, ss.total, pp.discount,pp.coupon FROM sales ss INNER JOIN stock s ON ss.stock_id = s.id INNER JOIN transaction ts ON ss.transaction_id = ts.id INNER JOIN product p ON s.product_id = p.id LEFT JOIN promos pp ON s.product_id = pp.product_id WHERE transaction_id = $1 ";
     const querySum =
       "select SUM(ss.total) AS totaltransaction, SUM(ss.quantity) AS quantityitems FROM sales ss INNER JOIN stock s ON ss.stock_id = s.id INNER JOIN product p ON s.product_id  = p.id WHERE ss.transaction_id = $1 group by ss.transaction_id  ";
-    const result = await dbconect.query(query, [transaction]);
-    const sumTotal = await dbconect.query(querySum, [transaction]);
+    const result = await db.query(query, [transaction]);
+    const sumTotal = await db.query(querySum, [transaction]);
     if (!result.rows.length) {
       throw new NotFoundError(
         "Failed to ged Data Sales By Transaction. Data not Found "
@@ -78,7 +76,7 @@ const getSales = async (id = null) => {
     if (id === null) {
       const query =
         "SELECT p.id, p.name ,p.category, p.description, p.img, ss.transaction_id,  s.size, ss.quantity, s.price, ss.total FROM sales ss INNER JOIN stock s ON ss.stock_id = s.id inner join product p on s.product_id  = p.id ORDER BY total DESC";
-      const result = await dbconect.query(query);
+      const result = await db.query(query);
       if (!result.rows.length) {
         throw new NotFoundError("Data not Found ");
       }
@@ -86,7 +84,7 @@ const getSales = async (id = null) => {
     }
     const query =
       "SELECT p.id, p.name ,p.category, p.description, p.img, ss.transaction_id,  s.size, ss.quantity, s.price, ss.total FROM sales ss INNER JOIN stock s ON ss.stock_id = s.id inner join product p on s.product_id  = p.id WHERE id = $1 ORDER BY total DESC";
-    const result = await dbconect.query(query, [id]);
+    const result = await db.query(query, [id]);
     if (!result.rows.length) {
       throw new NotFoundError(
         "Failed to ged Data Sales By Id. Data not Found "
@@ -107,7 +105,7 @@ const getSales = async (id = null) => {
 const deleteSalesByTransaction = async (transaction) => {
   try {
     const query = "DELETE FROM sales WHERE transactin_id = $1 RETURNING id";
-    const result = await dbconect.query(query, [transaction]);
+    const result = await db.query(query, [transaction]);
     if (!result.rows.length) {
       throw new NotFoundError(
         "Failed to delete Data Sales By Transaction. Data not Found "
