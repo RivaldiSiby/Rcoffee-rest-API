@@ -9,7 +9,7 @@ const cookieParser = require("cookie-parser");
 
 // router connect
 const mainRouter = require("./src/routes/index");
-const server = express;
+const server = express();
 // config
 // middleware
 const logger = require("morgan");
