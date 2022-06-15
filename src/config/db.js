@@ -1,10 +1,10 @@
-const { Pool } = require("pg");
+const { Client } = require("pg");
 
-const db = new Pool({
-  connectionString: process.env.HEROKU_POSTGRESQL_ONYX_URL,
+const client = new Client({
+  connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false,
   },
 });
 
-module.exports = db;
+module.exports = client;
