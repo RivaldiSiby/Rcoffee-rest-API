@@ -15,9 +15,19 @@ const mainRouter = require("./src/routes/index");
 const logger = require("morgan");
 // server
 const server = express();
+const { Client } = require("pg");
+
+const client = new Client({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
 
 const init = async () => {
   try {
+    // conect db
+    client.connect();
     // database check
     console.log("Database Conected");
     // middleware
