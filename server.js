@@ -9,21 +9,25 @@ const cookieParser = require("cookie-parser");
 
 // router connect
 const mainRouter = require("./src/routes/index");
-
+const server = express();
 // config
 // middleware
 const logger = require("morgan");
+const db = require("./src/config/db");
 // server
-const server = express();
 
-const init = async () => {
+const init = async (db) => {
   try {
+    // conect db
+    await db.connect();
     // database check
     console.log("Database Conected");
     // middleware
-    await server.use(
-      logger(":method :url :status :res[content-length] - :response-time ms")
-    );
+    if (process.env.STATUS !== "production") {
+      await server.use(
+        logger(":method :url :status :res[content-length] - :response-time ms")
+      );
+    }
     // handler/middlaware cookie
     await server.use(cookieParser());
     await server.use(express.static("public"));
@@ -54,4 +58,5 @@ const init = async () => {
 };
 
 // server
-init();
+
+init(db);

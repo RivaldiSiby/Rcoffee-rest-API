@@ -1,10 +1,9 @@
 const { nanoid } = require("nanoid");
-const { Pool } = require("pg");
 const ClientError = require("../exceptions/ClientError");
 const InvariantError = require("../exceptions/InvariantError");
 const NotFoundError = require("../exceptions/NotFoundError");
 const bcrypt = require("bcrypt");
-const dbconect = new Pool();
+const db = require("../config/db");
 
 const registerUser = async (body) => {
   try {
@@ -17,7 +16,7 @@ const registerUser = async (body) => {
 
     const query =
       "INSERT INTO users (id, email, password, phone, role, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id";
-    const result = await dbconect.query(query, [
+    const result = await db.query(query, [
       id,
       email,
       hashPassword,
@@ -44,7 +43,7 @@ const verifyUserByEmail = async (email) => {
   try {
     const query =
       "SELECT u.id,u.email,u.password,u.img,r.name AS role FROM users u INNER JOIN role r ON u.role = r.id WHERE email = $1";
-    const result = await dbconect.query(query, [email]);
+    const result = await db.query(query, [email]);
     if (!result.rows.length) {
       throw new InvariantError("Email is not registered Or Password is Wrong");
     }
@@ -66,7 +65,7 @@ const verifyUserByEmail = async (email) => {
 const verifyByEmail = async (email) => {
   try {
     const query = "SELECT email FROM users WHERE email = $1";
-    const result = await dbconect.query(query, [email]);
+    const result = await db.query(query, [email]);
     if (result.rows[0] !== undefined) {
       throw new InvariantError("Email is already in use");
     }
@@ -85,7 +84,7 @@ const postToken = async (token) => {
   try {
     const id = `token-${nanoid(16)}`;
     const query = "INSERT INTO auth VALUES ($1,$2) RETURNING id";
-    const result = await dbconect.query(query, [id, token]);
+    const result = await db.query(query, [id, token]);
     if (!result.rows.length) {
       throw new InvariantError("Failed to add token");
     }
@@ -103,7 +102,7 @@ const postToken = async (token) => {
 const verifyRefreshToken = async (token) => {
   try {
     const query = "SELECT token FROM auth WHERE token = $1";
-    const result = await dbconect.query(query, [token]);
+    const result = await db.query(query, [token]);
     if (!result.rows.length) {
       throw new InvariantError("Refresh Token not valid");
     }
@@ -120,7 +119,7 @@ const verifyRefreshToken = async (token) => {
 const deleteRefreshToken = async (token) => {
   try {
     const query = "DELETE FROM auth WHERE token = $1";
-    const result = await dbconect.query(query, [token]);
+    const result = await db.query(query, [token]);
     if (!result.rows.length) {
       throw new InvariantError("Refresh Token not valid");
     }

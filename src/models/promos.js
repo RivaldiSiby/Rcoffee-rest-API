@@ -1,9 +1,8 @@
 const { nanoid } = require("nanoid");
-const { Pool } = require("pg");
 const ClientError = require("../exceptions/ClientError");
 const InvariantError = require("../exceptions/InvariantError");
 const NotFoundError = require("../exceptions/NotFoundError");
-const dbconect = new Pool();
+const db = require("../config/db");
 const getPromosAll = async (query) => {
   try {
     // pagination
@@ -11,7 +10,7 @@ const getPromosAll = async (query) => {
     const offset = parseInt(page - 1) * Number(limit);
     const querySql =
       "SELECT p.id,pp.name,p.img,p.discount,p.coupon,p.description,p.created_at,p.updated_at FROM promos p INNER JOIN product pp ON p.product_id = pp.id LIMIT $1 OFFSET $2";
-    const result = await dbconect.query(querySql, [limit, offset]);
+    const result = await db.query(querySql, [limit, offset]);
 
     result.rows.map((item) => {
       path = item.img.split("\\");
@@ -22,7 +21,7 @@ const getPromosAll = async (query) => {
     };
 
     // data pagination
-    const count = await dbconect.query("SELECT COUNT(*) AS total FROM promos");
+    const count = await db.query("SELECT COUNT(*) AS total FROM promos");
     data.totalData = parseInt(count.rows[0]["total"]);
     data.totalPage = Math.ceil(data.totalData / parseInt(limit));
     return data;
@@ -40,7 +39,7 @@ const getPromosAll = async (query) => {
 const getPromosById = async (id) => {
   try {
     const query = "SELECT * FROM promos WHERE id=$1";
-    const result = await dbconect.query(query, [id]);
+    const result = await db.query(query, [id]);
 
     if (!result.rows.length) {
       throw new NotFoundError("Data not Found");
@@ -59,7 +58,7 @@ const getPromosById = async (id) => {
 const getPromosByCoupon = async (coupon) => {
   try {
     const query = "SELECT * FROM promos WHERE coupon=$1";
-    const result = await dbconect.query(query, [coupon]);
+    const result = await db.query(query, [coupon]);
 
     return result.rows[0];
   } catch (error) {
@@ -90,7 +89,7 @@ const postPromos = async (body) => {
     const updated_at = created_at;
     const query =
       "INSERT INTO promos VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id";
-    const result = await dbconect.query(query, [
+    const result = await db.query(query, [
       id,
       discount,
       description,
@@ -126,7 +125,7 @@ const patchPromosById = async (id, body) => {
     const updated_at = new Date().toISOString();
     const query =
       "UPDATE promos SET discount=$1, description=$2, coupon=$3, product_id=$4, updated_at=$5 WHERE id=$6 RETURNING id";
-    const result = await dbconect.query(query, [
+    const result = await db.query(query, [
       discount,
       description,
       coupon,
@@ -153,7 +152,7 @@ const patchPromosById = async (id, body) => {
 const deletePromosById = async (id) => {
   try {
     const query = "DELETE FROM promos WHERE id = $1 RETURNING id";
-    const result = await dbconect.query(query, [id]);
+    const result = await db.query(query, [id]);
 
     if (!result.rows.length) {
       throw new NotFoundError("failed to delete data. Data not Found");
