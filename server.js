@@ -26,7 +26,7 @@ const client = new Client({
 const init = async () => {
   try {
     // conect db
-    client.connect();
+    await client.connect();
     // database check
     console.log("Database Conected");
     // middleware
