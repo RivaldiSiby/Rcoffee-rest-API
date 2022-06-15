@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const AuthError = require("../../exceptions/authError");
+const AuthError = require("../../exceptions/AuthError");
 const ClientError = require("../../exceptions/ClientError");
 const ForbiddenError = require("../../exceptions/ForbiddenError");
 const InvariantError = require("../../exceptions/InvariantError");

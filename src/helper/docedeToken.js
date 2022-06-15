@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const AuthError = require("../exceptions/authError");
+const AuthError = require("../exceptions/AuthError");
 
 const decodeToken = async (header) => {
   try {
