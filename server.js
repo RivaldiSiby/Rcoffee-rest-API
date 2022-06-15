@@ -23,6 +23,9 @@ const client = new Client({
   },
 });
 
+console.log(process.env.DATABASE_URL);
+console.log(process.env.PORT);
+
 const init = async (db) => {
   try {
     // conect db
