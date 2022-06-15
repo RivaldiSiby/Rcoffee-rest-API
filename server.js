@@ -16,15 +16,15 @@ const mainRouter = require("./src/routes/index");
 const logger = require("morgan");
 // server
 
+console.log(process.env.DATABASE_URL);
+console.log(process.env.PORT);
+
 const client = new Client({
   connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false,
   },
 });
-
-console.log(process.env.DATABASE_URL);
-console.log(process.env.PORT);
 
 const init = async (db) => {
   try {
