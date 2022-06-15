@@ -23,10 +23,10 @@ const client = new Client({
   },
 });
 
-const init = async () => {
+const init = async (db) => {
   try {
     // conect db
-    await client.connect();
+    await db.connect();
     // database check
     console.log("Database Conected");
     // middleware
@@ -64,4 +64,4 @@ const init = async () => {
 
 // server
 
-init();
+init(client);
