@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
+const { Client } = require("pg");
 // time zone WIB
 // process.env.TZ = "Asia/Jakarta";
 
@@ -14,8 +15,6 @@ const mainRouter = require("./src/routes/index");
 // middleware
 const logger = require("morgan");
 // server
-const server = express();
-const { Client } = require("pg");
 
 const client = new Client({
   connectionString: process.env.DATABASE_URL,
@@ -27,7 +26,7 @@ const client = new Client({
 const init = async () => {
   try {
     // conect db
-    await client.connect();
+    client.connect();
     // database check
     console.log("Database Conected");
     // middleware
@@ -64,4 +63,5 @@ const init = async () => {
 };
 
 // server
+
 init();
