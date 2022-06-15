@@ -16,7 +16,7 @@ const logger = require("morgan");
 const db = require("./src/config/db");
 // server
 
-console.log(process.env.DATABASE_URL);
+console.log(process.env.HEROKU_POSTGRESQL_ONYX_URL);
 console.log(process.env.PORT);
 
 const init = async (db) => {
