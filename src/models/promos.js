@@ -41,6 +41,29 @@ const getPromosById = async (id) => {
     const query = "SELECT * FROM promos WHERE id=$1";
     const result = await db.query(query, [id]);
 
+    if (result.rows[0].img !== null) {
+      const path = result.rows[0].img.split("\\");
+      result.rows[0].img = `/${path[1]}/${path[2]}/${path[3]}`;
+    }
+    if (!result.rows.length) {
+      throw new NotFoundError("Data not Found");
+    }
+    return result.rows[0];
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
+    throw new Error(error.message);
+  }
+};
+const getPromosDetailById = async (id) => {
+  try {
+    const query = "SELECT * FROM promos WHERE id=$1";
+    const result = await db.query(query, [id]);
+
     if (!result.rows.length) {
       throw new NotFoundError("Data not Found");
     }
@@ -121,15 +144,30 @@ const postPromos = async (body) => {
 
 const patchPromosById = async (id, body) => {
   try {
-    const { discount, description, coupon, product_id } = body;
+    const {
+      discount,
+      description,
+      coupon,
+      product_id,
+      name,
+      size,
+      period_start,
+      expire,
+      img,
+    } = body;
     const updated_at = new Date().toISOString();
     const query =
-      "UPDATE promos SET discount=$1, description=$2, coupon=$3, product_id=$4, updated_at=$5 WHERE id=$6 RETURNING id";
+      "UPDATE promos SET discount=$1, description=$2, coupon=$3, product_id=$4, name=$5, size=$6, period_start=$7,expire=$8,img=$9, updated_at=$10 WHERE id=$11 RETURNING id";
     const result = await db.query(query, [
       discount,
       description,
       coupon,
       product_id,
+      name,
+      size,
+      period_start,
+      expire,
+      img,
       updated_at,
       id,
     ]);
@@ -151,7 +189,7 @@ const patchPromosById = async (id, body) => {
 
 const deletePromosById = async (id) => {
   try {
-    const query = "DELETE FROM promos WHERE id = $1 RETURNING id";
+    const query = "DELETE FROM promos WHERE id = $1 RETURNING img";
     const result = await db.query(query, [id]);
 
     if (!result.rows.length) {
@@ -176,4 +214,5 @@ module.exports = {
   patchPromosById,
   deletePromosById,
   getPromosByCoupon,
+  getPromosDetailById,
 };

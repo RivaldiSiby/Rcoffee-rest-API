@@ -2,6 +2,7 @@ const ClientError = require("../exceptions/ClientError");
 const response = require("../helper/response");
 const promos = require("../models/promos");
 const product = require("../models/product");
+const deleteFiles = require("../helper/delete");
 
 const readPromosAll = async (req, res) => {
   try {
@@ -106,9 +107,16 @@ const createPromos = async (req, res) => {
 };
 const editPromosById = async (req, res) => {
   try {
+    const { file = null } = req;
     const { id } = req.params;
-    let data = await promos.getPromosById(id);
+    let data = await promos.getPromosDetailById(id);
+
     // atur data patch
+    if (file !== null && data.img !== null) {
+      deleteFiles.imgFiles(data.img);
+    }
+    data.img = file !== null ? file.path : data.img;
+    console.log(data);
     data.discount =
       req.body.discount !== undefined ? req.body.discount : data.discount;
     data.description =
@@ -118,6 +126,14 @@ const editPromosById = async (req, res) => {
     data.coupon = req.body.coupon !== undefined ? req.body.coupon : data.coupon;
     data.product_id =
       req.body.product_id !== undefined ? req.body.product_id : data.product_id;
+    data.name = req.body.name !== undefined ? req.body.name : data.name;
+    data.size = req.body.size !== undefined ? req.body.size : data.size;
+    data.period_start =
+      req.body.period_start !== undefined
+        ? req.body.period_start
+        : data.period_start;
+    data.expire = req.body.expire !== undefined ? req.body.expire : data.expire;
+
     await promos.patchPromosById(id, data);
     return response.isSuccessNoData(res, 200, "Update Data has been success");
   } catch (error) {
@@ -137,7 +153,10 @@ const editPromosById = async (req, res) => {
 const deletePromosById = async (req, res) => {
   try {
     const { id } = req.params;
-    await promos.deletePromosById(id);
+    const img = await promos.deletePromosById(id);
+    if (img !== null) {
+      deleteFiles.imgFiles(img);
+    }
     return response.isSuccessNoData(res, 200, "Delete Data has been success");
   } catch (error) {
     if (error instanceof ClientError) {

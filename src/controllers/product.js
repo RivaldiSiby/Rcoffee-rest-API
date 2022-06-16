@@ -197,23 +197,22 @@ const editProductById = async (req, res) => {
   try {
     const { file = null } = req;
     const { id } = req.params;
-    let data = await product.getProductById(id);
+    let data = await product.getJustProductById(id);
     // atur data patch
     // hapus gambar
-    if (file !== null && data[0].img !== null) {
-      data[0].img = "public" + data[0].img;
-      await deleteFiles.imgFiles(data[0].img);
+    if (file !== null && data.img !== null) {
+      deleteFiles.imgFiles(data.img);
     }
-    data[0].img = file !== null ? file.path : data[0].img;
-    data[0].name = req.body.name !== undefined ? req.body.name : data[0].name;
-    data[0].description =
+    data.img = file !== null ? file.path : data.img;
+    data.name = req.body.name !== undefined ? req.body.name : data.name;
+    data.description =
       req.body.description !== undefined
         ? req.body.description
-        : data[0].description;
-    data[0].category =
-      req.body.category !== undefined ? req.body.category : data[0].category;
-    data[0].img = req.body.img !== undefined ? req.body.img : data[0].img;
-    await product.patchProduct(id, data[0]);
+        : data.description;
+    data.category =
+      req.body.category !== undefined ? req.body.category : data.category;
+    data.img = req.body.img !== undefined ? req.body.img : data.img;
+    await product.patchProduct(id, data);
 
     return response.isSuccessNoData(res, 200, "Update Data has been success");
   } catch (error) {
@@ -236,7 +235,7 @@ const deleteProductById = async (req, res) => {
     await stock.deleteStockByProduct(id);
     const img = await product.deleteProductById(id);
     if (img !== null) {
-      await deleteFiles.imgFiles(img);
+      deleteFiles.imgFiles(img);
     }
     return response.isSuccessNoData(res, 200, "Delete Data has been success");
   } catch (error) {
