@@ -1,6 +1,5 @@
 const { nanoid } = require("nanoid");
 
-const { Pool } = require("pg");
 const ClientError = require("../exceptions/ClientError");
 const InvariantError = require("../exceptions/InvariantError");
 const NotFoundError = require("../exceptions/NotFoundError");
@@ -270,8 +269,8 @@ const patchProduct = async (id, body) => {
       "UPDATE product SET name=$1, category=$2, description=$3, img=$4, updated_at=$5 WHERE id=$6 RETURNING id";
     const result = await db.query(query, [
       name,
-      description,
       category,
+      description,
       img,
       updated_at,
       id,
