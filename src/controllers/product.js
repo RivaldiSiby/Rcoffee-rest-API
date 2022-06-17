@@ -228,7 +228,24 @@ const editProductById = async (req, res) => {
     );
   }
 };
-
+const softDeleteProduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await product.softDelete(id);
+    return response.isSuccessNoData(res, 200, "Delete Data has been success");
+  } catch (error) {
+    if (error instanceof ClientError) {
+      return response.isError(res, error.statusCode, error.message);
+    }
+    //   error server
+    console.log(error);
+    return response.isError(
+      res,
+      500,
+      "Sorry, there was a failure on our server"
+    );
+  }
+};
 const deleteProductById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -253,6 +270,7 @@ const deleteProductById = async (req, res) => {
 };
 
 module.exports = {
+  softDeleteProduct,
   readProducts,
   readFavoriteProducts,
   readProductById,

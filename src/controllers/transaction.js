@@ -353,10 +353,29 @@ const readLastDay = async (req, res) => {
     );
   }
 };
+const softDeleteTransaction = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await transaction.softDelete(id);
+    return response.isSuccessNoData(res, 200, "Delete Data has been success");
+  } catch (error) {
+    if (error instanceof ClientError) {
+      return response.isError(res, error.statusCode, error.message);
+    }
+    //   error server
+    console.log(error);
+    return response.isError(
+      res,
+      500,
+      "Sorry, there was a failure on our server"
+    );
+  }
+};
 
 module.exports = {
   readLastDay,
   readAllData,
   createTransaction,
   readDetailTransactionById,
+  softDeleteTransaction,
 };

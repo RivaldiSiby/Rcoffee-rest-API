@@ -110,6 +110,26 @@ const getTransactionLastDay = async () => {
     throw new Error(error.message);
   }
 };
+const softDelete = async (id) => {
+  try {
+    const deleted_at = new Date().toISOString();
+    const query =
+      "UPDATE transaction SET deleted_at = $2 WHERE id = $1 RETURNING id";
+    const result = await db.query(query, [id, deleted_at]);
+    if (!result.rows.length) {
+      throw new NotFoundError("failed to delete data. Data not found");
+    }
+    return result.rows[0].img;
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
+    throw new Error(error.message);
+  }
+};
 
 const deleteTransactionById = async (id) => {
   try {
@@ -133,6 +153,7 @@ const deleteTransactionById = async (id) => {
 };
 
 module.exports = {
+  softDelete,
   getTransactionLastDay,
   deleteTransactionById,
   getTransactions,

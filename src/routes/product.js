@@ -12,6 +12,7 @@ const {
   deleteProductById,
   readFavoriteProducts,
   readJustProducts,
+  softDeleteProduct,
 } = productController;
 const ClientError = require("../exceptions/ClientError");
 const response = require("../helper/response");
@@ -85,6 +86,6 @@ Router.patch(
   productValidator.productValidatorPatch.validator,
   editProductById
 );
-Router.delete("/:id", auth.checkToken, auth.checkRole, deleteProductById);
+Router.delete("/:id", auth.checkToken, auth.checkRole, softDeleteProduct);
 
 module.exports = Router;
