@@ -55,8 +55,8 @@ const signIn = async (req, res) => {
     }
     // cek gambar
     const user = await users.getUserById(datauser.id);
-    const imgName =
-      datauser.img !== null ? datauser.img : "/img/users/usericon.png";
+    const imgName = user.img !== "" ? user.img : false;
+    console.log(user.img);
     // generate jwt
     const payload = {
       id: datauser.id,

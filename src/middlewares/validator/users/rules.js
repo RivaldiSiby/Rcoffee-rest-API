@@ -21,7 +21,7 @@ const rulesPatch = Joi.object({
   password: Joi.string().min(8),
   phone: Joi.number().min(11),
   date_birth: Joi.string(),
-  gender: Joi.string().valid("male", "female"),
+  gender: Joi.string(),
   address: Joi.string(),
   role: Joi.string(),
   description: Joi.string(),

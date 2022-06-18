@@ -82,7 +82,15 @@ const createPromos = async (req, res) => {
     if (file === null) {
       throw new InvariantError("Photo is required");
     }
-    const filename = file !== null ? file.path : null;
+    // upload cloud jika status production
+    let imgUrl = null;
+    if (file !== null) {
+      imgUrl =
+        process.env.STATUS === "production"
+          ? await cloudinary.cloudUploadHandler(file.path)
+          : file.path;
+    }
+    const filename = imgUrl;
     const body = { ...req.body, img: filename };
     await product.getJustProductById(req.body.product_id);
     const result = await promos.postPromos(body);
@@ -111,11 +119,24 @@ const editPromosById = async (req, res) => {
     const { id } = req.params;
     let data = await promos.getPromosDetailById(id);
 
-    // atur data patch
     if (file !== null && data.img !== null) {
-      deleteFiles.imgFiles(data.img);
+      let publicId;
+      if (process.env.STATUS === "production") {
+        publicId = data.img.split("/")[7].split(".")[0];
+      }
+      process.env.STATUS === "production"
+        ? await cloudinary.cloudDeleteHandler(publicId)
+        : deleteFiles.imgFiles(data.img);
     }
-    data.img = file !== null ? file.path : data.img;
+    // upload cloud jika status production
+    let imgUrl = null;
+    if (file !== null) {
+      imgUrl =
+        process.env.STATUS === "production"
+          ? await cloudinary.cloudUploadHandler(file.path)
+          : file.path;
+    }
+    data.img = file !== null ? imgUrl : data.img;
     console.log(data);
     data.discount =
       req.body.discount !== undefined ? req.body.discount : data.discount;
