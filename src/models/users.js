@@ -46,7 +46,9 @@ const getUserById = async (id) => {
       throw new NotFoundError("User Data By Id is not Found");
     }
     // generate img link
-    if (result.rows[0].img !== null) {
+
+    console.log(result.rows[0].img === "");
+    if (result.rows[0].img !== "") {
       const path = result.rows[0].img.split("\\");
       result.rows[0].img = `/${path[1]}/${path[2]}/${path[3]}`;
     }
@@ -68,7 +70,7 @@ const getUserByIdAllData = async (id) => {
     if (!result.rows.length) {
       throw new NotFoundError("User Data By Id is not Found");
     }
-    return result.rows;
+    return result.rows[0];
   } catch (error) {
     if (error instanceof NotFoundError) {
       throw new NotFoundError(error.message);

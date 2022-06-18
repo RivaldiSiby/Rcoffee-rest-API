@@ -68,7 +68,15 @@ const createUser = async (req, res) => {
     if (file === null) {
       throw new InvariantError("Photo is required");
     }
-    const filename = file !== null ? file.path : null;
+    // upload cloud jika status production
+    let imgUrl = null;
+    if (file !== null) {
+      imgUrl =
+        process.env.STATUS === "production"
+          ? await cloudinary.cloudUploadHandler(file.path)
+          : file.path;
+    }
+    const filename = imgUrl;
     const body = { ...req.body, img: filename };
     const result = await users.postUser(body);
     return response.isSuccessHaveData(
@@ -93,42 +101,50 @@ const createUser = async (req, res) => {
 const editUserById = async (req, res) => {
   try {
     const { file = null } = req;
+
     const payload = await decode.decodeToken(req.header("Authorization"));
 
     const id = payload.id;
     let data = await users.getUserByIdAllData(id);
 
     // hapus gambar lama
-    if (file !== null && data[0].img !== null) {
-      await deleteFiles.imgFiles(data[0].img);
+    if (file !== null && data.img !== null) {
+      let publicId;
+      if (process.env.STATUS === "production") {
+        publicId = data.img.split("/")[7].split(".")[0];
+      }
+      process.env.STATUS === "production"
+        ? await cloudinary.cloudDeleteHandler(publicId)
+        : deleteFiles.imgFiles(data.img);
     }
+    // upload cloud jika status production
+    let imgUrl = null;
+    if (file !== null) {
+      imgUrl =
+        process.env.STATUS === "production"
+          ? await cloudinary.cloudUploadHandler(file.path)
+          : file.path;
+    }
+    data.img = file !== null ? imgUrl : data.img;
     // atur data patch
-    data[0].img = file !== null ? file.path : data[0].img;
-    data[0].name = req.body.name !== undefined ? req.body.name : data[0].name;
-    data[0].first_name =
-      req.body.first_name !== undefined
-        ? req.body.first_name
-        : data[0].first_name;
-    data[0].last_name =
-      req.body.last_name !== undefined ? req.body.last_name : data[0].last_name;
-    data[0].email =
-      req.body.email !== undefined ? req.body.email : data[0].email;
-    data[0].password =
-      req.body.password !== undefined ? req.body.password : data[0].password;
-    data[0].phone =
-      req.body.phone !== undefined ? req.body.phone : data[0].phone;
-    data[0].date_birth =
-      req.body.date_birth !== undefined
-        ? req.body.date_birth
-        : data[0].date_birth;
-    data[0].gender =
-      req.body.gender !== undefined ? req.body.gender : data[0].gender;
-    data[0].address =
-      req.body.address !== undefined ? req.body.address : data[0].address;
-    data[0].role = req.body.role !== undefined ? req.body.role : data[0].role;
+    data.name = req.body.name !== undefined ? req.body.name : data.name;
+    data.first_name =
+      req.body.first_name !== undefined ? req.body.first_name : data.first_name;
+    data.last_name =
+      req.body.last_name !== undefined ? req.body.last_name : data.last_name;
+    data.email = req.body.email !== undefined ? req.body.email : data.email;
+    data.password =
+      req.body.password !== undefined ? req.body.password : data.password;
+    data.phone = req.body.phone !== undefined ? req.body.phone : data.phone;
+    data.date_birth =
+      req.body.date_birth !== undefined ? req.body.date_birth : data.date_birth;
+    data.gender = req.body.gender !== undefined ? req.body.gender : data.gender;
+    data.address =
+      req.body.address !== undefined ? req.body.address : data.address;
+    data.role = req.body.role !== undefined ? req.body.role : data.role;
     // hapus gambar
 
-    await users.patchUserById(id, data[0]);
+    await users.patchUserById(id, data);
 
     return response.isSuccessNoData(res, 200, "Update Data has been success");
   } catch (error) {

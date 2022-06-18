@@ -4,6 +4,7 @@ const product = require("../models/product");
 const stock = require("../models/stock");
 const deleteFiles = require("../helper/delete");
 const InvariantError = require("../exceptions/InvariantError");
+const cloudinary = require("../helper/uploadCloudinary");
 
 const readJustProducts = async (req, res) => {
   try {
@@ -170,7 +171,16 @@ const createProduct = async (req, res) => {
     if (file === null) {
       throw new InvariantError("Photo is required");
     }
-    const filename = file !== null ? file.path : null;
+    // upload cloud jika status production
+    let imgUrl = null;
+    if (file !== null) {
+      imgUrl =
+        process.env.STATUS === "production"
+          ? await cloudinary.cloudUploadHandler(file.path)
+          : file.path;
+    }
+
+    const filename = imgUrl;
     const body = { ...req.body, img: filename };
     const result = await product.postProduct(body);
     return response.isSuccessHaveData(
@@ -201,9 +211,23 @@ const editProductById = async (req, res) => {
     // atur data patch
     // hapus gambar
     if (file !== null && data.img !== null) {
-      deleteFiles.imgFiles(data.img);
+      let publicId;
+      if (process.env.STATUS === "production") {
+        publicId = data.img.split("/")[7].split(".")[0];
+      }
+      process.env.STATUS === "production"
+        ? await cloudinary.cloudDeleteHandler(publicId)
+        : deleteFiles.imgFiles(data.img);
     }
-    data.img = file !== null ? file.path : data.img;
+    // upload cloud jika status production
+    let imgUrl = null;
+    if (file !== null) {
+      imgUrl =
+        process.env.STATUS === "production"
+          ? await cloudinary.cloudUploadHandler(file.path)
+          : file.path;
+    }
+    data.img = file !== null ? imgUrl : data.img;
     data.name = req.body.name !== undefined ? req.body.name : data.name;
     data.description =
       req.body.description !== undefined
