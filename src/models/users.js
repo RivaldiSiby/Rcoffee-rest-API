@@ -13,11 +13,12 @@ const getUsers = async (query) => {
     const querySql =
       "SELECT u.id,u.name,u.email,u.phone,u.date_birth,u.gender,u.address,u.img,r.name as role FROM users u INNER JOIN role r ON u.role = r.id LIMIT $1 OFFSET $2";
     const result = await db.query(querySql, [limit, offset]);
-
-    result.rows.map((item) => {
-      path = item.img.split("\\");
-      item.img = `/${path[1]}/${path[2]}/${path[3]}`;
-    });
+    if (process.env.STATUS !== "production") {
+      result.rows.map((item) => {
+        path = item.img.split("\\");
+        item.img = `/${path[1]}/${path[2]}/${path[3]}`;
+      });
+    }
     const data = {
       data: result.rows,
     };
@@ -47,10 +48,11 @@ const getUserById = async (id) => {
     }
     // generate img link
 
-    console.log(result.rows[0].img === "");
-    if (result.rows[0].img !== "") {
-      const path = result.rows[0].img.split("\\");
-      result.rows[0].img = `/${path[1]}/${path[2]}/${path[3]}`;
+    if (process.env.STATUS !== "production") {
+      if (result.rows[0].img !== "") {
+        const path = result.rows[0].img.split("\\");
+        result.rows[0].img = `/${path[1]}/${path[2]}/${path[3]}`;
+      }
     }
     return result.rows[0];
   } catch (error) {

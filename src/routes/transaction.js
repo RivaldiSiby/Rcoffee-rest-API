@@ -10,6 +10,7 @@ const {
   createTransaction,
   readAllData,
   readDetailTransactionById,
+  softDeleteTransaction,
 } = transactionController;
 const auth = require("../middlewares/auth/auth");
 
@@ -20,6 +21,7 @@ Router.post(
   transactionValidator.validator,
   createTransaction
 );
+Router.patch("/delete", auth.checkToken, softDeleteTransaction);
 Router.get("/", auth.checkToken, readAllData);
 Router.get("/daily", auth.checkToken, auth.checkRole, readLastDay);
 Router.get("/:id", auth.checkToken, readDetailTransactionById);

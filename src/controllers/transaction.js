@@ -168,7 +168,7 @@ const readAllData = async (req, res) => {
     const payload = await decode.decodeToken(req.header("Authorization"));
     req.query.page = req.query.page === undefined ? 1 : req.query.page;
     const result = await transaction.getTransactions(payload, null, req.query);
-    console.log(result);
+
     const { totalData, totalPage, data } = result;
     let datatrans = [];
     data.map((item) => {
@@ -355,8 +355,29 @@ const readLastDay = async (req, res) => {
 };
 const softDeleteTransaction = async (req, res) => {
   try {
-    const { id } = req.params;
-    await transaction.softDelete(id);
+    const { id } = req.body;
+    console.log(req.body);
+    const deleteHandler = new Promise((resolve, reject) => {
+      let countData = 0;
+      id.map(async (item) => {
+        try {
+          await transaction.softDelete(item);
+          countData += 1;
+          if (countData === id.length) {
+            return resolve();
+          }
+        } catch (error) {
+          if (error instanceof ClientError) {
+            if (error.statusCode === 404) {
+              return reject(new NotFoundError(error.message));
+            }
+            return reject(new InvariantError(error.message));
+          }
+          return reject(new Error(error.message));
+        }
+      });
+    });
+    await deleteHandler;
     return response.isSuccessNoData(res, 200, "Delete Data has been success");
   } catch (error) {
     if (error instanceof ClientError) {

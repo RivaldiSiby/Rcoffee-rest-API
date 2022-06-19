@@ -44,13 +44,13 @@ const getTransactions = async (userdata = null, id = null, queryData) => {
       const { page = 1, limit = 12 } = queryData;
       const offset = parseInt(page - 1) * Number(limit);
       const querySql =
-        "SELECT t.id, t.user_id, t.coupon, t.delivery_cost, t.tax,t.payment_method, t.created_at, t.updated_at, SUM(s.total) AS Item_Total,SUM(s.quantity) AS quantity_items FROM transaction t INNER JOIN sales s on t.id = s.transaction_id WHERE t.user_id = $1  GROUP BY t.id LIMIT $2 OFFSET $3";
+        "SELECT t.id, t.user_id, t.coupon, t.delivery_cost, t.tax,t.payment_method, t.created_at, t.updated_at, SUM(s.total) AS Item_Total,SUM(s.quantity) AS quantity_items FROM transaction t INNER JOIN sales s on t.id = s.transaction_id WHERE t.user_id = $1 AND t.deleted_at = 'false' GROUP BY t.id ORDER BY t.created_at desc LIMIT $2 OFFSET $3";
       const result = await db.query(querySql, [userdata.id, limit, offset]);
       const data = {
         data: result.rows,
       };
       const resultCount = await db.query(
-        "SELECT COUNT(*) AS total FROM transaction"
+        "SELECT COUNT(*) AS total FROM transaction WHERE deleted_at = 'false'"
       );
       // data pagination
       data.totalData = parseInt(resultCount.rows[0].total);
@@ -62,19 +62,22 @@ const getTransactions = async (userdata = null, id = null, queryData) => {
       const { page = 1, limit = 12 } = queryData;
       const offset = parseInt(page - 1) * Number(limit);
       const querySql =
-        "SELECT t.id, t.user_id, t.coupon, t.delivery_cost, t.tax, t.created_at, t.updated_at, SUM(s.total) AS item_total, SUM(s.quantity) AS quantity_items FROM transaction t INNER JOIN sales s on t.id = s.transaction_id GROUP BY t.id LIMIT $1 OFFSET $2";
+        "SELECT t.id, t.user_id, t.coupon, t.delivery_cost, t.tax, t.created_at, t.updated_at, SUM(s.total) AS item_total, SUM(s.quantity) AS quantity_items FROM transaction t INNER JOIN sales s on t.id = s.transaction_id WHERE t.deleted_at = 'false' GROUP BY t.id LIMIT $1 OFFSET $2";
 
       const result = await db.query(querySql, [limit, offset]);
       const data = {
         data: result.rows,
       };
       // data pagination
-      const count = await db.query("SELECT COUNT(*) AS total FROM transaction");
+      const count = await db.query(
+        "SELECT COUNT(*) AS total FROM transaction WHERE deleted_at = 'false'"
+      );
       data.totalData = parseInt(count.rows[0]["total"]);
       data.totalPage = Math.ceil(data.totalData / parseInt(limit));
       return data;
     }
-    const query = "SELECT * FROM transaction WHERE id = $1";
+    const query =
+      "SELECT * FROM transaction WHERE id = $1 AND deleted_at = 'false'";
     const result = await db.query(query, [id]);
     if (!result.rows.length) {
       throw new NotFoundError("Transaction Data By Id is Not Found");

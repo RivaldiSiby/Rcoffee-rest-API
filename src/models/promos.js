@@ -11,11 +11,12 @@ const getPromosAll = async (query) => {
     const querySql =
       "SELECT p.id,pp.name,p.img,p.discount,p.coupon,p.description,p.created_at,p.updated_at FROM promos p INNER JOIN product pp ON p.product_id = pp.id LIMIT $1 OFFSET $2";
     const result = await db.query(querySql, [limit, offset]);
-
-    result.rows.map((item) => {
-      path = item.img.split("\\");
-      item.img = `/${path[1]}/${path[2]}/${path[3]}`;
-    });
+    if (process.env.STATUS !== "production") {
+      result.rows.map((item) => {
+        path = item.img.split("\\");
+        item.img = `/${path[1]}/${path[2]}/${path[3]}`;
+      });
+    }
     const data = {
       data: result.rows,
     };
