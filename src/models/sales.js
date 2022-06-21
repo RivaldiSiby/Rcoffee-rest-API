@@ -45,11 +45,12 @@ const getSalesByTransaction = async (transaction) => {
         "Failed to ged Data Sales By Transaction. Data not Found "
       );
     }
-
-    result.rows.map((item) => {
-      const path = item.img.split("\\");
-      item.img = `/${path[1]}/${path[2]}/${path[3]}`;
-    });
+    if (process.env.STATUS !== "production") {
+      result.rows.map((item) => {
+        const path = item.img.split("\\");
+        item.img = `/${path[1]}/${path[2]}/${path[3]}`;
+      });
+    }
 
     result.rows = [
       ...result.rows,
