@@ -40,7 +40,11 @@ const init = async (db) => {
 
     // pasang cors
     const corsOptions = {
-      origin: ["http://localhost:3000", "https://rcofffee-store.netlify.app"],
+      origin: [
+        "http://localhost:3000",
+        "https://rcofffee-store.netlify.app",
+        "http://localhost:8081",
+      ],
       methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization"],
     };
