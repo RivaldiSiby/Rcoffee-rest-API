@@ -64,7 +64,7 @@ const readProducts = async (req, res) => {
       ...next,
       ...prev,
     };
-    return response.isSuccessHaveData(
+    return response.isSuccessHavePagination(
       res,
       200,
       data,
@@ -117,7 +117,7 @@ const readFavoriteProducts = async (req, res) => {
       ...next,
       ...prev,
     };
-    return response.isSuccessHaveData(
+    return response.isSuccessHavePagination(
       res,
       200,
       data,

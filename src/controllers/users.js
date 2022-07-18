@@ -27,7 +27,7 @@ const readUsers = async (req, res) => {
     ...next,
     ...prev,
   };
-  return response.isSuccessHaveData(
+  return response.isSuccessHavePagination(
     res,
     200,
     data,
