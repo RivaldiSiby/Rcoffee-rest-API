@@ -11,6 +11,10 @@ Router.post(
   authController.signIn
 );
 Router.get("/:refresh", auth.checkRefresh);
+Router.get("/confirmEmail", authController.checkConfirmEmail);
+Router.get("/confirmPassword", authController.checkConfirmPassword);
+Router.get("/forgotPassword", authController.forgotPassword);
+Router.get("/resetPassword", authController.resetPassword);
 Router.delete("/:refresh", authController.logOut);
 Router.post(
   "/register",

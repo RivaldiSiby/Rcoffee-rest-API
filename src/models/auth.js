@@ -13,9 +13,10 @@ const registerUser = async (body) => {
     const created_at = new Date().toISOString();
     const updated_at = created_at;
     const hashPassword = await bcrypt.hash(password, 10);
+    const status = "inactive"
 
     const query =
-      "INSERT INTO users (id, email, password, phone, role, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id";
+      "INSERT INTO users (id, email, password, phone, role, created_at, updated_at,status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING email";
     const result = await db.query(query, [
       id,
       email,
@@ -24,11 +25,12 @@ const registerUser = async (body) => {
       role,
       created_at,
       updated_at,
+      status
     ]);
     if (!result.rows.length) {
       throw new InvariantError("Failed to Register");
     }
-    return result.rows[0].id;
+    return result.rows[0].email;
   } catch (error) {
     if (error instanceof NotFoundError) {
       throw new NotFoundError(error.message);
@@ -108,6 +110,7 @@ const verifyRefreshToken = async (token) => {
     if (!result.rows.length) {
       throw new InvariantError("Refresh Token not valid");
     }
+    return;
   } catch (error) {
     if (error instanceof NotFoundError) {
       throw error;
@@ -125,6 +128,7 @@ const deleteRefreshToken = async (token) => {
     if (!result.rows.length) {
       throw new InvariantError("Refresh Token not valid");
     }
+    return;
   } catch (error) {
     if (error instanceof NotFoundError) {
       throw error;
