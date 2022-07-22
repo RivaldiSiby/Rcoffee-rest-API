@@ -2,8 +2,14 @@ const express = require("express");
 const Router = express.Router();
 const usersController = require("../controllers/users");
 const usersValidator = require("../middlewares/validator/users/index");
-const { readUsers, readUserById, createUser, editUserById, deleteUserById } =
-  usersController;
+const {
+  readUsers,
+  readUserById,
+  updatedPass,
+  createUser,
+  editUserById,
+  deleteUserById,
+} = usersController;
 const auth = require("../middlewares/auth/auth");
 const owner = require("../middlewares/auth/owner");
 
@@ -11,6 +17,7 @@ const uploadHandler = require("../middlewares/files/files");
 // router users
 Router.get("/", auth.checkToken, auth.checkRole, readUsers);
 Router.get("/profile", auth.checkToken, readUserById);
+Router.patch("/changepass", auth.checkToken, updatedPass);
 Router.post(
   "/",
   owner.checkOwnerCode,

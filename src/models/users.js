@@ -133,6 +133,26 @@ const postUser = async (body) => {
   }
 };
 
+const patchPass = async (id, pass) => {
+  try {
+    const hashPassword = await bcrypt.hash(pass, 10);
+    const query = "update users set password=$1 where id = $2 returning id";
+    const result = await db.query(query, [hashPassword, id]);
+    if (!result.rows.length) {
+      throw new NotFoundError("Failed to update data. Data not Found");
+    }
+    return result.rows[0].id;
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
+    throw new Error(error.message);
+  }
+};
+
 const patchUserById = async (id, body) => {
   try {
     const {
@@ -203,6 +223,7 @@ const deleteUserById = async (id) => {
 };
 
 module.exports = {
+  patchPass,
   getUsers,
   getUserById,
   getUserByIdAllData,

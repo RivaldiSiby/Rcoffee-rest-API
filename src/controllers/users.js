@@ -1,10 +1,12 @@
 const users = require("../models/users");
+const auth = require("../models/auth");
 const response = require("../helper/response");
 const ClientError = require("../exceptions/ClientError");
 const decode = require("../helper/docedeToken");
 const deleteFiles = require("../helper/delete");
 const cloudinary = require("../helper/uploadCloudinary");
 const InvariantError = require("../exceptions/InvariantError");
+const bcrypt = require("bcrypt");
 
 const readUsers = async (req, res) => {
   req.query.page = req.query.page === undefined ? 1 : req.query.page;
@@ -167,9 +169,33 @@ const deleteUserById = async (req, res) => {
     const img = await users.deleteUserById(id);
     // hapus gambar
     if (img !== null) {
-      await deleteFiles.imgFiles(img);
+      deleteFiles.imgFiles(img);
     }
     return response.isSuccessNoData(res, 200, "Delete Data has been Success");
+  } catch (error) {
+    if (error instanceof ClientError) {
+      return response.isError(res, error.statusCode, error.message);
+    }
+
+    return response.isError(
+      res,
+      500,
+      "Sorry, there was a failure on our server"
+    );
+  }
+};
+const updatedPass = async (req, res) => {
+  try {
+    const payload = await decode.decodeToken(req.header("Authorization"));
+    const id = payload.id;
+    const datauser = await auth.verifyUserByEmail(payload.email);
+    const cekpass = await bcrypt.compare(req.body.password, datauser.password);
+    if (!cekpass) {
+      throw new InvariantError("Old Password is Wrong");
+    }
+    console.log(datauser);
+    await users.patchPass(id, req.body.newPassword);
+    return response.isSuccessNoData(res, 200, "Update Data has been success");
   } catch (error) {
     if (error instanceof ClientError) {
       return response.isError(res, error.statusCode, error.message);
@@ -189,4 +215,5 @@ module.exports = {
   createUser,
   editUserById,
   deleteUserById,
+  updatedPass,
 };
