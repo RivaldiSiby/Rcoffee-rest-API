@@ -12,8 +12,10 @@ const limit = {
 };
 
 const imageOnlyFilter = (req, file, cb) => {
+  console.log(file);
   const extName = path.extname(file.originalname).toLowerCase();
   const allowedExt = /jpg|png/;
+  console.log(file);
   if (!allowedExt.test(extName)) {
     return cb(
       new NotFoundError("Only Use Allowed Extension (JPG, PNG)"),
