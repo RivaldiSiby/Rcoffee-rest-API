@@ -102,7 +102,7 @@ const createUser = async (req, res) => {
 const editUserById = async (req, res) => {
   try {
     const { file = null } = req;
-
+    console.log(file);
     const payload = await decode.decodeToken(req.header("Authorization"));
 
     const id = payload.id;
