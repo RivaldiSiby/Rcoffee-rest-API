@@ -50,7 +50,8 @@ const getTransactions = async (userdata = null, id = null, queryData) => {
         data: result.rows,
       };
       const resultCount = await db.query(
-        "SELECT COUNT(*) AS total FROM transaction WHERE deleted_at = 'false'"
+        "SELECT COUNT(*) AS total FROM transaction WHERE user_id = $1 deleted_at = 'false'",
+        [userdata.id]
       );
       // data pagination
       data.totalData = parseInt(resultCount.rows[0].total);
