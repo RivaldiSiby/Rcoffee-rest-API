@@ -13,7 +13,7 @@ const registerUser = async (body) => {
     const created_at = new Date().toISOString();
     const updated_at = created_at;
     const hashPassword = await bcrypt.hash(password, 10);
-    const status = "inactive"
+    const status = "inactive";
 
     const query =
       "INSERT INTO users (id, email, password, phone, role, created_at, updated_at,status) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING email";
@@ -25,7 +25,7 @@ const registerUser = async (body) => {
       role,
       created_at,
       updated_at,
-      status
+      status,
     ]);
     if (!result.rows.length) {
       throw new InvariantError("Failed to Register");
@@ -72,6 +72,24 @@ const verifyByEmail = async (email) => {
     const result = await db.query(query, [email]);
     if (result.rows[0] !== undefined) {
       throw new InvariantError("Email is already in use");
+    }
+    return result.rows[0];
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+    if (error instanceof ClientError) {
+      throw error;
+    }
+    throw new Error(error.message);
+  }
+};
+const cekEmail = async (email) => {
+  try {
+    const query = "SELECT email FROM users WHERE email = $1";
+    const result = await db.query(query, [email]);
+    if (!result.rows.length) {
+      throw new InvariantError("Email is not registered ");
     }
     return result.rows[0];
   } catch (error) {
@@ -147,4 +165,5 @@ module.exports = {
   verifyRefreshToken,
   postToken,
   deleteRefreshToken,
+  cekEmail,
 };

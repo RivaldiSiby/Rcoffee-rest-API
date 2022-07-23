@@ -118,7 +118,7 @@ const checkConfirmPassword = async (req, res) => {
 const forgotPassword = async (req, res) => {
   try {
     // cek apakah email ada
-    const emailCek = await auth.verifyUserByEmail(req.body.email);
+    const emailCek = await auth.cekEmail(req.body.email);
     if (!emailCek.rows.length) {
       throw new InvariantError("Email is not registered ");
     }
