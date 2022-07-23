@@ -3,6 +3,7 @@ const response = require("../helper/response");
 const promos = require("../models/promos");
 const product = require("../models/product");
 const deleteFiles = require("../helper/delete");
+const cloudinary = require("../helper/uploadCloudinary");
 
 const readPromosAll = async (req, res) => {
   try {

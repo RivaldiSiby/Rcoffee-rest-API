@@ -42,7 +42,7 @@ const register = async (req, res) => {
 };
 const checkConfirmEmail = async (req, res) => {
   try {
-    const result = mail.getMail(req.body.email);
+    const result = await mail.getMail(req.body.email);
     // cek validasi code
     if (result.code !== req.body.code) {
       throw new InvariantError("wrong code");
@@ -67,32 +67,27 @@ const checkConfirmEmail = async (req, res) => {
     );
   }
 };
-const resetPassword = (req,res) => {
+const resetPassword = async (req, res) => {
   try {
-    await mail.resetPass(req.body.email,req.body.code,req.body.password)
+    await mail.resetPass(req.body.email, req.body.code, req.body.password);
     // cek validasi code
-    
-    return response.isSuccessHaveData(
-      res,
-      201,
-      { code: result.code, email: result.email },
-      "Confirm code is success"
-    );
+
+    return response.isSuccessNoData(res, 200, "Password has been updated");
   } catch (error) {
     console.log(error);
     if (error instanceof ClientError) {
       return response.isError(res, error.statusCode, error.message);
     }
-    return response.isSuccessNoData(
+    return response.isError(
       res,
-      200,
-      "Password has been updated"
+      500,
+      "Sorry, there was a failure on our server"
     );
   }
-}
+};
 const checkConfirmPassword = async (req, res) => {
   try {
-    const result = mail.getMail(req.body.email);
+    const result = await mail.getMail(req.body.email);
     // cek validasi code
     if (result.code !== req.body.code) {
       throw new InvariantError("wrong code");
@@ -105,7 +100,7 @@ const checkConfirmPassword = async (req, res) => {
     return response.isSuccessHaveData(
       res,
       201,
-      { code: result.code, email: result.email },
+      { code: result.code, email: result.destination },
       "Confirm code is success"
     );
   } catch (error) {
@@ -124,12 +119,13 @@ const forgotPassword = async (req, res) => {
   try {
     const code = Math.floor(Math.random() * 899999 + 100000);
     const destination = req.body.email;
-    const purpose = "Forgo_Password";
+    const purpose = "Forgot_Password";
     // set expirre
     const now = new Date().getTime();
     // expire 10 menit
     const expire = now + 10 * 60 * 1000;
     // post mail
+    await mail.deleteMail(req.body.email);
     await mail.postMail({ destination, purpose, expire, code });
     await sendPasswordConfirmation(req.body.email, code);
     return response.isSuccessNoData(
@@ -234,5 +230,5 @@ module.exports = {
   logOut,
   checkConfirmEmail,
   checkConfirmPassword,
-  resetPassword
+  resetPassword,
 };
