@@ -117,6 +117,11 @@ const checkConfirmPassword = async (req, res) => {
 };
 const forgotPassword = async (req, res) => {
   try {
+    // cek apakah email ada
+    const emailCek = await auth.verifyUserByEmail(req.body.email);
+    if (!emailCek.rows.length) {
+      throw new InvariantError("Email is not registered ");
+    }
     const code = Math.floor(Math.random() * 899999 + 100000);
     const destination = req.body.email;
     const purpose = "Forgot_Password";
