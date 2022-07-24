@@ -11,7 +11,7 @@ const postTransaction = async (id, body) => {
     const updated_at = created_at;
 
     const query =
-      "INSERT INTO transaction VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id";
+      "INSERT INTO transaction VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id";
     const result = await db.query(query, [
       id,
       user_id,
@@ -21,6 +21,7 @@ const postTransaction = async (id, body) => {
       created_at,
       updated_at,
       payment_method,
+      "processed",
     ]);
     if (!result.rows.length) {
       throw InvariantError("Failed to add Data");
@@ -44,7 +45,7 @@ const getTransactions = async (userdata = null, id = null, queryData) => {
       const { page = 1, limit = 12 } = queryData;
       const offset = parseInt(page - 1) * Number(limit);
       const querySql =
-        "SELECT t.id, t.user_id, t.coupon, t.delivery_cost, t.tax,t.payment_method, t.created_at, t.updated_at, SUM(s.total) AS Item_Total,SUM(s.quantity) AS quantity_items FROM transaction t INNER JOIN sales s on t.id = s.transaction_id WHERE t.user_id = $1 AND t.deleted_at = 'false' GROUP BY t.id ORDER BY t.created_at desc LIMIT $2 OFFSET $3";
+        "SELECT t.id, t.user_id, t.coupon,t.status, t.delivery_cost, t.tax,t.payment_method, t.created_at, t.updated_at, SUM(s.total) AS Item_Total,SUM(s.quantity) AS quantity_items FROM transaction t INNER JOIN sales s on t.id = s.transaction_id WHERE t.user_id = $1 AND t.deleted_at = 'false' GROUP BY t.id ORDER BY t.created_at desc LIMIT $2 OFFSET $3";
       const result = await db.query(querySql, [userdata.id, limit, offset]);
       const data = {
         data: result.rows,
@@ -63,7 +64,7 @@ const getTransactions = async (userdata = null, id = null, queryData) => {
       const { page = 1, limit = 12 } = queryData;
       const offset = parseInt(page - 1) * Number(limit);
       const querySql =
-        "SELECT t.id, t.user_id, t.coupon, t.delivery_cost, t.tax, t.created_at, t.updated_at, SUM(s.total) AS item_total, SUM(s.quantity) AS quantity_items FROM transaction t INNER JOIN sales s on t.id = s.transaction_id WHERE t.deleted_at = 'false' GROUP BY t.id LIMIT $1 OFFSET $2";
+        "SELECT t.id, t.user_id,t.status, t.coupon, t.delivery_cost, t.tax, t.created_at, t.updated_at, SUM(s.total) AS item_total, SUM(s.quantity) AS quantity_items FROM transaction t INNER JOIN sales s on t.id = s.transaction_id WHERE t.deleted_at = 'false' GROUP BY t.id LIMIT $1 OFFSET $2";
 
       const result = await db.query(querySql, [limit, offset]);
       const data = {
@@ -98,7 +99,7 @@ const getTransactions = async (userdata = null, id = null, queryData) => {
 const getTransactionLastDay = async () => {
   try {
     const querySql =
-      "SELECT t.id, t.user_id, t.coupon, t.delivery_cost, t.tax, t.created_at, t.updated_at, SUM(s.total) AS Item_Total,SUM(s.quantity) AS quantity_items FROM transaction t INNER JOIN sales s on t.id = s.transaction_id GROUP BY t.id ";
+      "SELECT t.id, t.user_id, t.coupon,t.status, t.delivery_cost, t.tax, t.created_at, t.updated_at, SUM(s.total) AS Item_Total,SUM(s.quantity) AS quantity_items FROM transaction t INNER JOIN sales s on t.id = s.transaction_id GROUP BY t.id ";
     const result = await db.query(querySql);
     if (!result.rows.length) {
       throw new NotFoundError("Transaction Data is Not Found");
@@ -122,6 +123,25 @@ const softDelete = async (id) => {
     const result = await db.query(query, [id, deleted_at]);
     if (!result.rows.length) {
       throw new NotFoundError("failed to delete data. Data not found");
+    }
+    return result.rows[0].img;
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw new NotFoundError(error.message);
+    }
+    if (error instanceof ClientError) {
+      throw new NotFoundError(error.message);
+    }
+    throw new Error(error.message);
+  }
+};
+const doneTransaction = async (id) => {
+  try {
+    const query =
+      "UPDATE transaction SET statu = 'done' WHERE id = $1 RETURNING id";
+    const result = await db.query(query, [id]);
+    if (!result.rows.length) {
+      throw new NotFoundError("Failed to confirm done . Data not found");
     }
     return result.rows[0].img;
   } catch (error) {
@@ -162,4 +182,5 @@ module.exports = {
   deleteTransactionById,
   getTransactions,
   postTransaction,
+  doneTransaction,
 };

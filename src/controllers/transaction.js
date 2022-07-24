@@ -392,6 +392,45 @@ const softDeleteTransaction = async (req, res) => {
     );
   }
 };
+const confirmDoneTransaction = async (req, res) => {
+  try {
+    const { id } = req.body;
+    console.log(req.body);
+    const confirmHandler = new Promise((resolve, reject) => {
+      let countData = 0;
+      id.map(async (item) => {
+        try {
+          await transaction.doneTransaction(item);
+          countData += 1;
+          if (countData === id.length) {
+            return resolve();
+          }
+        } catch (error) {
+          if (error instanceof ClientError) {
+            if (error.statusCode === 404) {
+              return reject(new NotFoundError(error.message));
+            }
+            return reject(new InvariantError(error.message));
+          }
+          return reject(new Error(error.message));
+        }
+      });
+    });
+    await confirmHandler;
+    return response.isSuccessNoData(res, 200, "Transaction is Done");
+  } catch (error) {
+    if (error instanceof ClientError) {
+      return response.isError(res, error.statusCode, error.message);
+    }
+    //   error server
+    console.log(error);
+    return response.isError(
+      res,
+      500,
+      "Sorry, there was a failure on our server"
+    );
+  }
+};
 
 module.exports = {
   readLastDay,
@@ -399,4 +438,5 @@ module.exports = {
   createTransaction,
   readDetailTransactionById,
   softDeleteTransaction,
+  confirmDoneTransaction,
 };

@@ -1,4 +1,5 @@
 const ClientError = require("../exceptions/ClientError");
+const InvariantError = require("../exceptions/InvariantError");
 const response = require("../helper/response");
 const promos = require("../models/promos");
 const product = require("../models/product");
