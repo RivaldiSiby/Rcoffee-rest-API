@@ -64,7 +64,7 @@ const getTransactions = async (userdata = null, id = null, queryData) => {
       const { page = 1, limit = 12 } = queryData;
       const offset = parseInt(page - 1) * Number(limit);
       const querySql =
-        "SELECT t.id, t.user_id,t.status, t.coupon, t.delivery_cost, t.tax, t.created_at, t.updated_at, SUM(s.total) AS item_total, SUM(s.quantity) AS quantity_items FROM transaction t INNER JOIN sales s on t.id = s.transaction_id WHERE t.deleted_at = 'false' GROUP BY t.id LIMIT $1 OFFSET $2";
+        "SELECT t.id, t.user_id,t.status, t.coupon, t.delivery_cost,t.payment_method, t.tax, t.created_at, t.updated_at, SUM(s.total) AS item_total, SUM(s.quantity) AS quantity_items FROM transaction t INNER JOIN sales s on t.id = s.transaction_id WHERE t.deleted_at = 'false' and t.status = 'processed' GROUP BY t.id LIMIT $1 OFFSET $2";
 
       const result = await db.query(querySql, [limit, offset]);
       const data = {
@@ -138,7 +138,7 @@ const softDelete = async (id) => {
 const doneTransaction = async (id) => {
   try {
     const query =
-      "UPDATE transaction SET statu = 'done' WHERE id = $1 RETURNING id";
+      "UPDATE transaction SET status = 'done' WHERE id = $1 RETURNING id";
     const result = await db.query(query, [id]);
     if (!result.rows.length) {
       throw new NotFoundError("Failed to confirm done . Data not found");
