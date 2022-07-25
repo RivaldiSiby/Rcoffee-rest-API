@@ -42,10 +42,13 @@ const getPromosById = async (id) => {
     const query = "SELECT * FROM promos WHERE id=$1";
     const result = await db.query(query, [id]);
 
-    if (result.rows[0].img !== null) {
-      const path = result.rows[0].img.split("\\");
-      result.rows[0].img = `/${path[1]}/${path[2]}/${path[3]}`;
+    if (process.env.STATUS !== "production") {
+      if (result.rows[0].img !== null) {
+        const path = result.rows[0].img.split("\\");
+        result.rows[0].img = `/${path[1]}/${path[2]}/${path[3]}`;
+      }
     }
+
     if (!result.rows.length) {
       throw new NotFoundError("Data not Found");
     }
