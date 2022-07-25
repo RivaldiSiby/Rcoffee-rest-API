@@ -12,6 +12,7 @@ const {
   readDetailTransactionById,
   softDeleteTransaction,
   confirmDoneTransaction,
+  readLastMonth,
 } = transactionController;
 const auth = require("../middlewares/auth/auth");
 
@@ -26,6 +27,7 @@ Router.patch("/delete", auth.checkToken, softDeleteTransaction);
 Router.patch("/confirmDone", auth.checkToken, confirmDoneTransaction);
 Router.get("/", auth.checkToken, readAllData);
 Router.get("/daily", auth.checkToken, auth.checkRole, readLastDay);
+Router.get("/monthly", auth.checkToken, auth.checkRole, readLastMonth);
 Router.get("/:id", auth.checkToken, readDetailTransactionById);
 
 module.exports = Router;

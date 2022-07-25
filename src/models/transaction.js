@@ -96,10 +96,11 @@ const getTransactions = async (userdata = null, id = null, queryData) => {
   }
 };
 
-const getTransactionLastDay = async () => {
+const getTransactionReport = async (report) => {
   try {
-    const querySql =
-      "SELECT t.id, t.user_id, t.coupon,t.status, t.delivery_cost, t.tax, t.created_at, t.updated_at, SUM(s.total) AS Item_Total,SUM(s.quantity) AS quantity_items FROM transaction t INNER JOIN sales s on t.id = s.transaction_id GROUP BY t.id ";
+    let querySql =
+      "SELECT t.id, t.user_id, t.coupon,t.status, t.delivery_cost, t.tax, t.created_at, t.updated_at, SUM(s.total) AS Item_Total,SUM(s.quantity) AS quantity_items FROM transaction t INNER JOIN sales s on t.id = s.transaction_id where t.created_at > now() - interval '6' ";
+    querySql += `${report} GROUP BY t.id `;
     const result = await db.query(querySql);
     if (!result.rows.length) {
       throw new NotFoundError("Transaction Data is Not Found");
@@ -178,7 +179,7 @@ const deleteTransactionById = async (id) => {
 
 module.exports = {
   softDelete,
-  getTransactionLastDay,
+  getTransactionReport,
   deleteTransactionById,
   getTransactions,
   postTransaction,
