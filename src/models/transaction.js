@@ -9,7 +9,8 @@ const postTransaction = async (id, body) => {
     const { user_id, coupon, delivery_cost, tax, payment_method } = body;
     const created_at = new Date().toISOString();
     const updated_at = created_at;
-
+    const status = "processed";
+    console.log(body);
     const query =
       "INSERT INTO transaction VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id";
     const result = await db.query(query, [
@@ -21,7 +22,7 @@ const postTransaction = async (id, body) => {
       created_at,
       updated_at,
       payment_method,
-      "processed",
+      status,
     ]);
     if (!result.rows.length) {
       throw InvariantError("Failed to add Data");
