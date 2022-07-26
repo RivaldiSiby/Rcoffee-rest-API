@@ -18,5 +18,11 @@ Router.use("/promos", promosRouter);
 Router.use("/transaction", transactionRouter);
 Router.use("/auth", authRouter);
 Router.use("/role", roleRouter);
+// notfound
+// Router.get("*", function (req, res) {
+//   res.status(404).send({
+//     msg: "API not found",
+//   });
+// });
 
 module.exports = Router;

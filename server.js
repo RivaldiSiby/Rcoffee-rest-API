@@ -8,7 +8,7 @@ const cookieParser = require("cookie-parser");
 // process.env.TZ = "Asia/Jakarta";
 
 // router connect
-const mainRouter = require("./src/routes/index");
+let mainRouter = require("./src/routes/index");
 const server = express();
 // config
 // middleware
@@ -24,19 +24,19 @@ const init = async (db) => {
     console.log("Database Conected");
     // middleware
     if (process.env.STATUS !== "production") {
-      await server.use(
+      server.use(
         logger(":method :url :status :res[content-length] - :response-time ms")
       );
     }
     // handler/middlaware cookie
-    await server.use(cookieParser());
-    await server.use(express.static("public"));
+    server.use(cookieParser());
+    server.use(express.static("public"));
     // handler/middleware urlencoded
-    await server.use(express.urlencoded({ extended: false }));
+    server.use(express.urlencoded({ extended: false }));
 
     // handler/middleware raw json
-    await server.use(express.text());
-    await server.use(express.json());
+    server.use(express.text());
+    server.use(express.json());
 
     // pasang cors
     const corsOptions = {
@@ -50,10 +50,10 @@ const init = async (db) => {
     };
     server.use(cors(corsOptions));
     // router
-    await server.use(mainRouter);
+    server.use(mainRouter);
 
     // start server
-    await server.listen(process.env.PORT, () => {
+    server.listen(process.env.PORT, () => {
       console.log(`Server is Running at port ${process.env.PORT}`);
     });
   } catch (error) {
