@@ -10,9 +10,8 @@ const postTransaction = async (id, body) => {
     const created_at = new Date().toISOString();
     const updated_at = created_at;
     const status = "processed";
-    console.log(body);
     const query =
-      "INSERT INTO transaction VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id";
+      "INSERT INTO transaction VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id";
     const result = await db.query(query, [
       id,
       user_id,
@@ -22,6 +21,7 @@ const postTransaction = async (id, body) => {
       created_at,
       updated_at,
       payment_method,
+      "false",
       status,
     ]);
     if (!result.rows.length) {
