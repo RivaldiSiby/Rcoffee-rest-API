@@ -11,8 +11,8 @@ const ClientError = require("../exceptions/ClientError");
 const InvariantError = require("../exceptions/InvariantError");
 const NotFoundError = require("../exceptions/NotFoundError");
 // firebase
-const { messaging } = require("../config/firebase");
-const notif = messaging();
+// const { messaging } = require("../config/firebase");
+// const notif = messaging();
 const createTransaction = async (req, res) => {
   try {
     //   id transaction
@@ -98,15 +98,15 @@ const createTransaction = async (req, res) => {
       const body = { ...req.body, user_id: user_id };
       const result = await transaction.postTransaction(id, body);
       // remote notification push
-      const data = {
-        token:
-          "d173jnJiTj-goIv0zeT9_N:APA91bHcRbzqIENm_zzyGHUoGESpX24seTfa2QOKT4sOTHfjClFCRDXLug9mfpfOEmv1zrpw8pppuWtTE-NXpJyj1Ydb4RKnN_Mzx_CQcD5Nudow_OXvsibGd-RMf5LnlsTk267aEGv3",
-        notification: {
-          body: "You have a transaction to process",
-          title: "Hi, Admin",
-        },
-      };
-      await notif.send(data);
+      // const data = {
+      //   token:
+      //     "d173jnJiTj-goIv0zeT9_N:APA91bHcRbzqIENm_zzyGHUoGESpX24seTfa2QOKT4sOTHfjClFCRDXLug9mfpfOEmv1zrpw8pppuWtTE-NXpJyj1Ydb4RKnN_Mzx_CQcD5Nudow_OXvsibGd-RMf5LnlsTk267aEGv3",
+      //   notification: {
+      //     body: "You have a transaction to process",
+      //     titl: "Hi, Admin",
+      //   },
+      // };
+      // await notif.send(data);
       return response.isSuccessHaveData(
         res,
         201,
