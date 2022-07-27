@@ -104,11 +104,10 @@ const createTransaction = async (req, res) => {
       // notif all admin , when user create notification
       const broadcastToAdmin = new Promise((resolve, reject) => {
         let count = 0;
-        calladmin.map(async () => {
+        calladmin.map(async (item) => {
           try {
             const data = {
-              token:
-                "d173jnJiTj-goIv0zeT9_N:APA91bHcRbzqIENm_zzyGHUoGESpX24seTfa2QOKT4sOTHfjClFCRDXLug9mfpfOEmv1zrpw8pppuWtTE-NXpJyj1Ydb4RKnN_Mzx_CQcD5Nudow_OXvsibGd-RMf5LnlsTk267aEGv3",
+              token: item.notification_token,
               notification: {
                 body: "You have a transaction to process",
                 title: "Hi, Admin",
