@@ -166,7 +166,7 @@ const logOut = async (req, res) => {
 
 const signIn = async (req, res) => {
   try {
-    const { email, password, device, notification_token } = req.body;
+    const { email, password, device, notification_token = null } = req.body;
     const datauser = await auth.verifyUserByEmail(email);
     const cekpass = await bcrypt.compare(password, datauser.password);
 
