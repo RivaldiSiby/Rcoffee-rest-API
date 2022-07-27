@@ -102,11 +102,34 @@ const cekEmail = async (email) => {
     throw new Error(error.message);
   }
 };
-const postToken = async (token) => {
+const getAdminOnline = async () => {
   try {
+    const query =
+      "select a.* from auth a inner join users u on a.user_id = u.id inner join role r on u.role = r.id where r.name = 'admin' and a.device = 'android' OR a.device = 'ios' ";
+    const result = await db.query(query);
+    return result.rows;
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+    if (error instanceof ClientError) {
+      throw error;
+    }
+    throw new Error(error.message);
+  }
+};
+const postToken = async (data) => {
+  try {
+    const { token, device, notification_token, user_id } = data;
     const id = `token-${nanoid(16)}`;
-    const query = "INSERT INTO auth VALUES ($1,$2) RETURNING id";
-    const result = await db.query(query, [id, token]);
+    const query = "INSERT INTO auth VALUES ($1,$2,$3,$4,$5) RETURNING id";
+    const result = await db.query(query, [
+      id,
+      token,
+      device,
+      notification_token,
+      user_id,
+    ]);
     if (!result.rows.length) {
       throw new InvariantError("Failed to add token");
     }
@@ -166,4 +189,5 @@ module.exports = {
   postToken,
   deleteRefreshToken,
   cekEmail,
+  getAdminOnline,
 };

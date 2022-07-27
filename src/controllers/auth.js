@@ -166,7 +166,7 @@ const logOut = async (req, res) => {
 
 const signIn = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, device, notification_token } = req.body;
     const datauser = await auth.verifyUserByEmail(email);
     const cekpass = await bcrypt.compare(password, datauser.password);
 
@@ -192,18 +192,20 @@ const signIn = async (req, res) => {
       issuer: process.env.JWT_ISSUER,
       expiresIn: "1d", // expired in 1d
     };
-    const token = await jwt.sign(
-      payload,
-      process.env.JWT_SECRET,
-      jwtOptionsToken
-    );
-    const refreshToken = await jwt.sign(
+    const token = jwt.sign(payload, process.env.JWT_SECRET, jwtOptionsToken);
+    const refreshToken = jwt.sign(
       payload,
       process.env.JWT_REFRESH_SECRET,
       jwtOptionsRefreshToken
     );
-    // push ke database refresh tokenya
-    await auth.postToken(refreshToken);
+    // data for auth
+    const userAuth = {
+      token: refreshToken,
+      device: device,
+      notification_token: notification_token,
+      user_id: datauser.id,
+    };
+    await auth.postToken(userAuth);
 
     return response.isSuccessHaveData(
       res,

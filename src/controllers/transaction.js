@@ -1,4 +1,5 @@
 const transaction = require("../models/transaction");
+const auth = require("../models/auth");
 const sales = require("../models/sales");
 const stock = require("../models/stock");
 const promos = require("../models/promos");
@@ -11,8 +12,8 @@ const ClientError = require("../exceptions/ClientError");
 const InvariantError = require("../exceptions/InvariantError");
 const NotFoundError = require("../exceptions/NotFoundError");
 // firebase
-// const { messaging } = require("../config/firebase");
-// const notif = messaging();
+const { messaging } = require("../config/firebase");
+const notif = messaging();
 const createTransaction = async (req, res) => {
   try {
     //   id transaction
@@ -98,15 +99,39 @@ const createTransaction = async (req, res) => {
       const body = { ...req.body, user_id: user_id };
       const result = await transaction.postTransaction(id, body);
       // remote notification push
-      // const data = {
-      //   token:
-      //     "d173jnJiTj-goIv0zeT9_N:APA91bHcRbzqIENm_zzyGHUoGESpX24seTfa2QOKT4sOTHfjClFCRDXLug9mfpfOEmv1zrpw8pppuWtTE-NXpJyj1Ydb4RKnN_Mzx_CQcD5Nudow_OXvsibGd-RMf5LnlsTk267aEGv3",
-      //   notification: {
-      //     body: "You have a transaction to process",
-      //     titl: "Hi, Admin",
-      //   },
-      // };
-      // await notif.send(data);
+      const calladmin = await auth.getAdminOnline();
+
+      // notif all admin , when user create notification
+      const broadcastToAdmin = new Promise((resolve, reject) => {
+        let count = 0;
+        calladmin.map(async () => {
+          try {
+            const data = {
+              token:
+                "d173jnJiTj-goIv0zeT9_N:APA91bHcRbzqIENm_zzyGHUoGESpX24seTfa2QOKT4sOTHfjClFCRDXLug9mfpfOEmv1zrpw8pppuWtTE-NXpJyj1Ydb4RKnN_Mzx_CQcD5Nudow_OXvsibGd-RMf5LnlsTk267aEGv3",
+              notification: {
+                body: "You have a transaction to process",
+                titl: "Hi, Admin",
+              },
+            };
+            await notif.send(data);
+
+            count += 1;
+            if (count === calladmin.length) {
+              resolve();
+            }
+          } catch (error) {
+            console.log(error);
+            reject(error);
+          }
+        });
+      });
+
+      // cek admin online
+      if (calladmin.length > 0) {
+        await broadcastToAdmin;
+      }
+
       return response.isSuccessHaveData(
         res,
         201,
