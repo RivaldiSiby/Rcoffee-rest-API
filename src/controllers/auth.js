@@ -205,6 +205,9 @@ const signIn = async (req, res) => {
       notification_token: notification_token,
       user_id: datauser.id,
     };
+    // cek replace auth data if sign in with same device
+
+    await auth.deleteSameAuht(device, datauser.id, notification_token);
     await auth.postToken(userAuth);
 
     return response.isSuccessHaveData(

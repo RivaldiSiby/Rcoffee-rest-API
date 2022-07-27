@@ -111,7 +111,7 @@ const createTransaction = async (req, res) => {
                 "d173jnJiTj-goIv0zeT9_N:APA91bHcRbzqIENm_zzyGHUoGESpX24seTfa2QOKT4sOTHfjClFCRDXLug9mfpfOEmv1zrpw8pppuWtTE-NXpJyj1Ydb4RKnN_Mzx_CQcD5Nudow_OXvsibGd-RMf5LnlsTk267aEGv3",
               notification: {
                 body: "You have a transaction to process",
-                titl: "Hi, Admin",
+                title: "Hi, Admin",
               },
             };
             await notif.send(data);

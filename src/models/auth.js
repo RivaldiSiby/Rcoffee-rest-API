@@ -162,6 +162,23 @@ const verifyRefreshToken = async (token) => {
     throw new Error(error.message);
   }
 };
+const deleteSameAuht = async (device, user_id, notification_token) => {
+  try {
+    const query =
+      "DELETE FROM auth WHERE device = $1 AND user_id = $2 AND notification_token = $3 returning id";
+    await db.query(query, [device, user_id, notification_token]);
+
+    return;
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+    if (error instanceof ClientError) {
+      throw error;
+    }
+    throw new Error(error.message);
+  }
+};
 const deleteRefreshToken = async (token) => {
   try {
     const query = "DELETE FROM auth WHERE token = $1";
@@ -190,4 +207,5 @@ module.exports = {
   deleteRefreshToken,
   cekEmail,
   getAdminOnline,
+  deleteSameAuht,
 };
