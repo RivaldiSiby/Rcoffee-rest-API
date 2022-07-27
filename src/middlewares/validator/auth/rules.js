@@ -8,6 +8,8 @@ const rulesRegis = Joi.object({
 const rulesSignIn = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().required(),
+  device: Joi.string().required(),
+  notification_token: Joi.string(),
 });
 
 module.exports = { rulesSignIn, rulesRegis };
